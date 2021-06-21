@@ -30,7 +30,7 @@ class Records(models.Model):
     fo_use_case = models.CharField(max_length=50, choices=FO_USE_CASE_CHOICES)
     midas_version = models.CharField(max_length=50, choices=MIDAS_VERSION_CHOICES)
     project = models.CharField(max_length=50, choices=PROJECT_CHOICES)
-    region = models.CharField(max_length=50)
+    region = models.CharField(max_length=50, choices=())
     record_type = models.CharField(max_length=50, choices=RECORD_TYPE_CHOICES)
     activity = models.CharField(max_length=50)
     activity_channel = models.IntegerField(blank=True, validators=[MaxValueValidator(limit_value=5150), MinValueValidator(limit_value=0)])

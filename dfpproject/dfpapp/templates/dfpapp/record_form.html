@@ -5,7 +5,7 @@
   <br>
   <h1>New Record</h1>
 
-  <form id="InsertRecordForm"  method="POST">
+  <form id="InsertRecordForm"  data-regions-url="{% url 'dfpapp:ajax_load_regions' %}" method="POST">
     {% csrf_token %}
     {% bootstrap_form form %}
 
@@ -13,5 +13,22 @@
 
   </form>
   <br>
+  <script>
+    $("#ProjectField").change(function () {
+      var url = $("#InsertRecordForm").attr("data-regions-url");  // get the url of the `load_regions` view
+      var project = $(this).val();  // get the selected project from the HTML input
+
+      $.ajax({                       // initialize an AJAX request
+        url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
+        data: {
+          'project': project       // add the project to the GET parameters
+        },
+        success: function (data) {   // `data` is the return of the `load_regions` view function
+          $("#RegionField").html(data);  // replace the contents of the regions input with the data that came from the server
+        }
+      });
+
+    });
+  </script>
 
 {% endblock %}

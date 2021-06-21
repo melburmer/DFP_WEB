@@ -3,7 +3,7 @@
     "midas_version": ["midas1.0","midas1.5b","midas3a","midas3","midas2","midas1.5"],
     "project": ["konvensiyonel","yht","aselsan","istanbul","proof_of_concept","botas","igtas","kayi","middle_east"],
     "region_botas": ["osmaniye","viransehir","idil","ceyhan","silopi","midyat","araban","pazarcik"],
-    "region_konvensiyonel": ["selcuk","balıkesir","balikesir"],
+    "region_konvensiyonel": ["selcuk","balikesir"],
     "region_aselsan": ["macunkoy","golbek"],
     "region_middle_east": ["urdun","suudi_arabistan"],
     "region_proof_of_concept": ["mebs"],
