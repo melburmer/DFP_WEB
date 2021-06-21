@@ -1,0 +1,11 @@
+{
+  "activity_names": ["digging", "human", "excavator"],
+  "activity_indices": [0, 1, 3],
+  "activity_prob_threshes": [[0.6], [0.7], [0.8]],
+  "activity_counts_threshes": [12, 6, 24],
+  "activity_norm_power_threshes": [-20, -40, -20],
+  "activity_windows": [600, 30, 600],
+  "fs_norm_power": 5,
+  "time_start_idx": 0
+
+}

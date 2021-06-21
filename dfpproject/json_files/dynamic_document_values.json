@@ -1,0 +1,22 @@
+{
+    "fo_use_case": ["fence","special_data","railway","underground"],
+    "midas_version": ["midas1.0","midas1.5b","midas3a","midas3","midas2","midas1.5"],
+    "project": ["konvensiyonel","yht","aselsan","istanbul","proof_of_concept","botas","igtas","kayi","middle_east"],
+    "region_botas": ["osmaniye","viransehir","idil","ceyhan","silopi","midyat","araban","pazarcik"],
+    "region_konvensiyonel": ["selcuk","balıkesir","balikesir"],
+    "region_aselsan": ["macunkoy","golbek"],
+    "region_middle_east": ["urdun","suudi_arabistan"],
+    "region_proof_of_concept": ["mebs"],
+    "region_istanbul": ["istanbul_metrosu"],
+    "region_yht": ["polatli","sincan","konya"],
+    "region_igtas": ["istanbul"],
+    "region_kayi": ["hatay","igdir"],
+    "record_type": ["alarm_triggered","on_demand"],
+    "activity_type_underground": ["long","raining","human","excavator","vehicle","digging","earthquake"],
+    "activity_type_railway": ["stone_fall","long","rail_crack","rail_tracker"],
+    "activity_type_fence": ["climbing","hitting_cable","long","shaking_cable","cut","jump_and_run"],
+    "soil_type": ["islaktoprak","kurutoprak","cakil-macur","beton","asfalt"],
+    "record_label": ["true_alarm","false_alarm"],
+    "activity_specification_human": ["walking","tum_saha_yurume"],
+    "activity_specification_excavator": ["cutter"]
+}

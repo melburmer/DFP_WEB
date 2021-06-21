@@ -1,0 +1,23 @@
+{
+   "activity_names": ["digging", "human", "excavator"],
+   "activity_indices": [0, 1, 2],
+   "activity_alarm_types": [13, 1, 14],
+   "activity_min_lags": [1, 1, 1],
+   "activity_windows": [600, 30, 600],
+   "activity_conv_filters": [[1], [0, 1, 0], [1]],
+   "activity_range_vals": [40, 20, 40],
+   "activity_min_adjacent_nums": [-1, 1, 1], 
+   "activity_counts_threshes": [12, 6, 24],
+   "activity_norm_power_threshes":[-20, -40, -20],
+   "activity_prob_threshes":[[0.6, 0.7, 0.8, 0.9, 0.92, 0.95], [0.6, 0.7, 0.8, 0.9], [0.6, 0.7, 0.8, 0.9]],
+   "power_data_offset":3,
+   "end_time_in_secs": 18000,
+   "fs_power_data": 5, 
+   "fs_prob_data": 5, 
+   "power_time_start_idx": 0, 
+   "power_time_stride":2, 
+   "prob_time_start_idx":0, 
+   "enable_cutter_for_exc": 0,
+   "reset_on":0
+	
+}

@@ -1,0 +1,11 @@
+/venv
+/exe_files
+input.json
+delete.json
+filter.json
+/dfp_project/json/test_set.json
+!/file_hierarchy
+/.idea
+*.bat
+*.pyc
+/__pycache__

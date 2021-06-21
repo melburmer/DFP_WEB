@@ -1,0 +1,17 @@
+{% extends 'base.html'%}
+{% load django_bootstrap5 %}
+
+{% block content%}
+  <br>
+  <h1>New Record</h1>
+
+  <form id="InsertRecordForm"  method="POST">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+
+    <input type="submit" value="Insert" class="btn btn-primary btn-lg">
+
+  </form>
+  <br>
+
+{% endblock %}

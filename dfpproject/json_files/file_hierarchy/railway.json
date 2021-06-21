@@ -1,0 +1,10 @@
+{
+    "fo_use_case": ["railway"],
+    "midas_version": ["midas1.0","midas1.5","midas1.5b","midas2","midas3a","midas3"],
+    "project": ["istanbul","konvensiyonel","yht"],
+    "region_istanbul": ["istanbul_metrosu"],
+    "region_konvensiyonel": ["selcuk","balikesir"],
+    "region_yht": ["konya","polatli","sincan"],
+    "record_type": ["alarm_triggered","on_demand"],
+    "activity_type": ["rail_crack","rail_tracker","stone_fall","long"]
+}

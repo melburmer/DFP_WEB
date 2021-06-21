@@ -1,0 +1,8 @@
+{
+	"proper_document_keys": ["fo_use_case", "midas_version", "project", "line_or_facility", "region", "territory",
+							 "record_type", "activity", "activity_specification", "activity_direction", "soil_type",
+							 "distance_to_fo", "activity_channel", "pulse_width", "sensor_id", "record_label"],
+							 
+	"file_system_keys": ["fo_use_case", "midas_version", "project", "region", "record_type", "activity"]
+	
+}

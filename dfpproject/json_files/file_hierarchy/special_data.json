@@ -1,0 +1,5 @@
+{
+    "fo_use_case": ["underground","fence"],
+    "midas_version": ["midas1.0","midas1.5","midas1.5b","midas2","midas3a","midas3"],
+    "record_type": ["alarm_triggered","on_demand"]
+}
