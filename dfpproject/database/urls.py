@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from . import views
 
-app_name = 'dfpapp'
+app_name = 'database'
 
 urlpatterns = [
     url(r'insert/$', views.InsertRecord.as_view(), name='insert'),

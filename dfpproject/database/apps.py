@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class DfpappConfig(AppConfig):
+class DatabaseConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'dfpapp'
+    name = 'database'

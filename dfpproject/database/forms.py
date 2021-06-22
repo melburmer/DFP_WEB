@@ -4,7 +4,6 @@ from django import forms
 
 
 class RecordCreateForm(ModelForm):
-
     class Meta:
         # select fields to show
         fields = ("is_special_data","fo_use_case", "midas_version", "project", "region", "record_type", 'activity',
@@ -28,3 +27,4 @@ class RecordCreateForm(ModelForm):
         self.fields['region'].widget.attrs.update({'id':'RegionField','disabled':True})
         self.fields['activity'].widget.attrs.update({'id':'ActField','disabled':True})
         self.fields['activity_specification'].widget.attrs.update({'id':'ActSpeField','disabled':True})
+        self.fields['is_special_data'].widget.attrs.update({'id':'SpecialDataField'})

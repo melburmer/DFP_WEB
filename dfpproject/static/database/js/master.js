@@ -54,3 +54,19 @@ $("#ActField").change(function () {
   });
 
 });
+
+
+// $(document).ready(function(){
+//     $("#SpecialDataField").click(function(){
+//         if($(this).is(":checked")){
+//             $("#ActField").prop('required',false);
+//             $("#ProjectField").prop('required',false);
+//             $("#RegionField").prop('required',false);
+//         }
+//         else if($(this).is(":not(:checked)")){
+//             $("#ActField").prop('required',true);
+//             $("#ProjectField").prop('required',true);
+//             $("#RegionField").prop('required',true);
+//         }
+//     });
+// });

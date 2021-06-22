@@ -12,7 +12,7 @@ dynamic_doc_path =   Path(__file__).resolve().parent.parent / 'json_files' / 'dy
 class InsertRecord(CreateView):
     form_class = forms.RecordCreateForm
     success_url = reverse_lazy('home')
-    template_name = 'dfpapp/record_form.html'
+    template_name = 'database/record_form.html'
 
 
 def load_regions(request): # load list of regions for given project
@@ -23,7 +23,7 @@ def load_regions(request): # load list of regions for given project
     else:
         regions = ""
 
-    return render(request, 'dfpapp/region_dropdown_list_options.html', {'regions': regions}) # render back
+    return render(request, 'database/region_dropdown_list_options.html', {'regions': regions}) # render back
 
 # load list of activity type for given fo_use_case
 def load_act_types(request):
@@ -33,7 +33,7 @@ def load_act_types(request):
         acts = dynamic_doc[f"activity_type_{fo_use_case}"]
     else:
         acts = ""
-    return render(request, 'dfpapp/act_dropdown_list_options.html', {'acts':acts})
+    return render(request, 'database/act_dropdown_list_options.html', {'acts':acts})
 
 
 # view to load activity specifications
@@ -48,4 +48,4 @@ def load_actspecs(request):
             actspecs = ""
     else:
         actspecs = ""
-    return render(request, 'dfpapp/actspecs_dropdown_list_options.html', {'actspecs':actspecs})
+    return render(request, 'database/actspecs_dropdown_list_options.html', {'actspecs':actspecs})

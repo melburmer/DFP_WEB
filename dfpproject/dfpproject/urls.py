@@ -21,5 +21,5 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.HomePage.as_view(), name='home'),
-    url(r'^dfpapp/', include('dfpapp.urls', namespace='dfpapp')),
+    url(r'^database/', include('database.urls', namespace='database')),
 ]

@@ -5,8 +5,8 @@
   <br>
   <h1>New Record</h1>
 
-  <form method="POST" id="InsertRecordForm"  data-regions-url="{% url 'dfpapp:ajax_load_regions' %}"
-    data-acts-url="{% url 'dfpapp:ajax_load_acts' %}" data-actspecs-url="{% url 'dfpapp:ajax_load_actspecs' %}">
+  <form method="POST" id="InsertRecordForm"  data-regions-url="{% url 'database:ajax_load_regions' %}"
+    data-acts-url="{% url 'database:ajax_load_acts' %}" data-actspecs-url="{% url 'database:ajax_load_actspecs' %}">
     {% csrf_token %}
     {% bootstrap_form form %}
 
