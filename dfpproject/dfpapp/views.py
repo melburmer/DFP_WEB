@@ -18,5 +18,34 @@ class InsertRecord(CreateView):
 def load_regions(request): # load list of regions for given project
     dynamic_doc = read_json(dynamic_doc_path) # read dynamic doc
     project = request.GET.get('project') # fetch selected project
-    regions = dynamic_doc[f"region_{project}"] # find project specific regions
+    if project: # if project field is selected
+        regions = dynamic_doc[f"region_{project}"] # find project specific regions
+    else:
+        regions = ""
+
     return render(request, 'dfpapp/region_dropdown_list_options.html', {'regions': regions}) # render back
+
+# load list of activity type for given fo_use_case
+def load_act_types(request):
+    dynamic_doc = read_json(dynamic_doc_path) # read dynamic doc
+    fo_use_case = request.GET.get('fo_use_case') # fetch selected fo use case
+    if fo_use_case:
+        acts = dynamic_doc[f"activity_type_{fo_use_case}"]
+    else:
+        acts = ""
+    return render(request, 'dfpapp/act_dropdown_list_options.html', {'acts':acts})
+
+
+# view to load activity specifications
+def load_actspecs(request):
+    dynamic_doc = read_json(dynamic_doc_path) # read dynamic doc
+    activity = request.GET.get('activity') # fetch selected act
+    if activity:
+        try:
+            actspecs = dynamic_doc[f'activity_specification_{activity}']
+
+        except KeyError: # if act-specfication is not defined for selected act
+            actspecs = ""
+    else:
+        actspecs = ""
+    return render(request, 'dfpapp/actspecs_dropdown_list_options.html', {'actspecs':actspecs})

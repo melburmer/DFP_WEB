@@ -24,19 +24,49 @@ class Records(models.Model):
     RECORD_LABEL_CHOICES = list(zip(dynamic_doc["record_label"], dynamic_doc["record_label"]))
     LINE_OR_FACILITY_CHOICES = [('line','line'), ('facility', 'facility')]
     ACT_DIRECTION_CHOICES = [('horizontal','horizontal'), ('vertical', 'vertical')]
+    SOIL_TYPE_CHOICES = list(zip(dynamic_doc["soil_type"], dynamic_doc["soil_type"]))
+
+    # define avaliable field for region , activity , act specification
+    # set avaliable regions
+    AVALIABLE_REGION_CHOICES = []
+    for project_tuple in PROJECT_CHOICES:
+        project = project_tuple[0] # select first item of the tuple
+        cur_region = dynamic_doc[f'region_{project}'] # fetch region for selected project
+        region_tuple_list = list(zip(cur_region, cur_region)) # crete tuple from region (choices attr need tuple)
+        AVALIABLE_REGION_CHOICES = AVALIABLE_REGION_CHOICES + region_tuple_list # add it to the regions list
+
+    # set avaliable activities
+    AVALIABLE_ACT_CHOICES = []
+    for fo_use_case_tuple in FO_USE_CASE_CHOICES:
+        fo_use_case = fo_use_case_tuple[0]
+        cur_act = dynamic_doc[f'activity_type_{fo_use_case}']
+        act_tuple_list = list(zip(cur_act, cur_act))
+        AVALIABLE_ACT_CHOICES = AVALIABLE_ACT_CHOICES + act_tuple_list
+
+    # set avaliable activity_specifications
+    AVALIABLE_ACTSPEC_CHOICES = []
+    for act_tuple in AVALIABLE_ACT_CHOICES:
+        act = act_tuple[0]
+        try:
+            cur_act_spec = dynamic_doc[f'activity_specification_{act}']
+        except KeyError:
+            continue
+        act_spec_tuple_list = list(zip(cur_act_spec, cur_act_spec))
+        AVALIABLE_ACTSPEC_CHOICES = AVALIABLE_ACTSPEC_CHOICES + act_spec_tuple_list
+
     # define fields
     is_special_data = models.BooleanField(default=False)
     file_name = models.CharField(max_length=100)
     fo_use_case = models.CharField(max_length=50, choices=FO_USE_CASE_CHOICES)
     midas_version = models.CharField(max_length=50, choices=MIDAS_VERSION_CHOICES)
     project = models.CharField(max_length=50, choices=PROJECT_CHOICES)
-    region = models.CharField(max_length=50, choices=())
+    region = models.CharField(max_length=50, choices=AVALIABLE_REGION_CHOICES)
     record_type = models.CharField(max_length=50, choices=RECORD_TYPE_CHOICES)
-    activity = models.CharField(max_length=50)
+    activity = models.CharField(max_length=50, choices=AVALIABLE_ACT_CHOICES)
     activity_channel = models.IntegerField(blank=True, validators=[MaxValueValidator(limit_value=5150), MinValueValidator(limit_value=0)])
-    activity_specification = models.CharField(max_length=50, blank=True)
+    activity_specification = models.CharField(max_length=50, blank=True, choices=AVALIABLE_ACTSPEC_CHOICES)
     activity_direction = models.CharField(max_length=50, blank=True, choices=ACT_DIRECTION_CHOICES)
-    soil_type = models.CharField(max_length=50, blank=True)
+    soil_type = models.CharField(max_length=50, blank=True, choices=SOIL_TYPE_CHOICES)
     pulse_width = models.IntegerField(null=True, blank=True)
     distance_to_fo = models.CharField(max_length=50, blank=True)
     sensor_id = models.CharField(max_length=50, blank=True)

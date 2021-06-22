@@ -1,5 +1,5 @@
 {
-    "fo_use_case": ["fence","special_data","railway","underground"],
+    "fo_use_case": ["fence","railway","underground"],
     "midas_version": ["midas1.0","midas1.5b","midas3a","midas3","midas2","midas1.5"],
     "project": ["konvensiyonel","yht","aselsan","istanbul","proof_of_concept","botas","igtas","kayi","middle_east"],
     "region_botas": ["osmaniye","viransehir","idil","ceyhan","silopi","midyat","araban","pazarcik"],
@@ -17,6 +17,8 @@
     "activity_type_fence": ["climbing","hitting_cable","long","shaking_cable","cut","jump_and_run"],
     "soil_type": ["islaktoprak","kurutoprak","cakil-macur","beton","asfalt"],
     "record_label": ["true_alarm","false_alarm"],
-    "activity_specification_human": ["walking","tum_saha_yurume"],
-    "activity_specification_excavator": ["cutter"]
+    "activity_specification_human": ["walking","tum_saha_yurume", "running"],
+    "activity_specification_excavator": ["cutter"],
+	"activity_specification_digging": []
+	
 }
