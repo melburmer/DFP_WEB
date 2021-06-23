@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 import numpy
 import subprocess
+from tkinter import Tk, filedialog
 
 
 
@@ -144,9 +145,10 @@ def replace_value_in_json(json_path, key, new_val, old_val="unknown"):
 
 
 
-
-
-
-
-
-
+def ask_file_path(extension):
+    root = Tk()
+    root.wm_attributes('-topmost', 1)
+    root.withdraw()
+    source_file_path = filedialog.askopenfilename(parent=root,
+    title=f"Please select {extension} file", filetype=[(f"{extension} files", f"*.{extension}")])
+    return source_file_path

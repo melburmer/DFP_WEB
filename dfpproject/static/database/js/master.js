@@ -9,7 +9,7 @@ $("#ProjectField").change(function () {
       'project': project       // add the project to the GET parameters
     },
     success: function (data) {   // `data` is the return of the `load_regions` view function
-      $("#RegionField").prop("disabled", false);
+      $('#RegionField').prop('disabled', false);
       $("#RegionField").html(data);  // replace the contents of the regions input with the data that came from the server
     }
   });
@@ -27,7 +27,7 @@ $("#UsecaseField").change(function () {
       'fo_use_case': fo_use_case       // add the fo_use_case to the GET parameters
     },
     success: function (data) {
-      $("#ActField").prop("disabled", false);
+      $('#ActField').prop('disabled', false);
       $("#ActField").html(data);
     }
   });
@@ -39,6 +39,7 @@ $("#UsecaseField").change(function () {
 
 
 $("#ActField").change(function () {
+
   var url = $("#InsertRecordForm").attr("data-actspecs-url");
   var activity = $(this).val();
 
@@ -48,14 +49,28 @@ $("#ActField").change(function () {
       'activity': activity       // add the act to the GET parameters
     },
     success: function (data) {
-      $("#ActSpeField").prop("disabled", false);
+      $('#ActSpeField').prop('disabled', false);
       $("#ActSpeField").html(data);
     }
   });
 
 });
 
+$("#RecordTypeField").on('change', function () {
 
+    if (this.value == 'alarm_triggered')
+    {
+      $('#RemoveHeaderField').parent().show() // show label
+      $("#RemoveHeaderField").show(); // show checkbox
+    }
+    else{
+        $('#RemoveHeaderField').parent().hide(); // hide label
+        $("#RemoveHeaderField").hide(); // hide checkbox
+
+        }
+}).trigger('change');
+
+// here is fore understand is special data checkbox is seleected or not
 // $(document).ready(function(){
 //     $("#SpecialDataField").click(function(){
 //         if($(this).is(":checked")){

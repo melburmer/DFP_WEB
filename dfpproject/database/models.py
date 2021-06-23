@@ -1,14 +1,35 @@
 from django.db import models
+from djongo import models as djongo_model
 import json
 from pathlib import Path
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from utils.file_io import read_json
 import datetime
 
 
 # Create your models here.
-dynamic_doc_path =   Path(__file__).resolve().parent.parent / 'json_files' / 'dynamic_document_values.json'
 
+# abstract model to store alarm triggered filed header in record model as embedded field
+
+class Atheader(models.Model):
+    message_type = models.IntegerField()
+    unit_id = models.IntegerField()
+    sensor_id = models.IntegerField()
+    start_channel_number = models.IntegerField()
+    end_channel_number = models.IntegerField()
+    sequance_number = models.IntegerField()
+    sampling_rate = models.FloatField()
+    bit_depth = models.IntegerField()
+    array_size = models.IntegerField()
+
+    class Meta:
+        abstract=True
+
+
+
+#records model
+dynamic_doc_path =   Path(__file__).resolve().parent.parent / 'json_files' / 'dynamic_document_values.json'
 class Records(models.Model):
 
     def __str__(self):
@@ -61,6 +82,7 @@ class Records(models.Model):
     midas_version = models.CharField(max_length=50, choices=MIDAS_VERSION_CHOICES)
     project = models.CharField(max_length=50, choices=PROJECT_CHOICES)
     region = models.CharField(max_length=50, choices=AVALIABLE_REGION_CHOICES)
+    territory = models.CharField(max_length=50)
     record_type = models.CharField(max_length=50, choices=RECORD_TYPE_CHOICES)
     activity = models.CharField(max_length=50, choices=AVALIABLE_ACT_CHOICES)
     activity_channel = models.IntegerField(blank=True, validators=[MaxValueValidator(limit_value=5150), MinValueValidator(limit_value=0)])
@@ -80,17 +102,13 @@ class Records(models.Model):
     record_size = models.BigIntegerField()
     record_length_in_sec = models.IntegerField()
     sampling_rate = models.IntegerField()
-    #bin_file_hash = models.CharField(max_length=100, editable=False, unique=True,error_messages={'unique': 'Duplicate data, Cannot insert it!'})
-    #info_file_hash = models.CharField(max_length=100, editable=False, unique=True,error_messages={'unique': 'Duplicate data, Cannot insert it!'})
+    bin_file_hash = models.CharField(max_length=100, editable=False, unique=True)
+    info_file_hash = models.CharField(max_length=100, editable=False, unique=True)
     time_of_day = models.CharField(max_length=50)
     record_date = models.DateTimeField()
     record_notes = models.TextField(max_length=250, blank=True)
-    #data_full_path = models.CharField(max_length=100, unique=True)
+    at_header = djongo_model.EmbeddedField(model_container=Atheader, null=True)
+    data_full_path = models.CharField(max_length=100, unique=True, default="")
 
     class Meta:
         ordering = ['-insertion_date']
-
-    # override save method to customize save operation
-    def save(self, *args, **kwargs):
-        self.insertion_date = datetime.datetime.now()
-        super().save(*args, **kwargs)  # call the 'real' save method

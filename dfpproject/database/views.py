@@ -1,18 +1,185 @@
 from django.shortcuts import render
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
+from django.contrib.messages.views import SuccessMessageMixin
 from . import forms
 from utils.file_io import read_json
+from utils import params, das_util, file_io
+from helper_modules.hashing import hash_file
 from pathlib import Path
+from django.http import HttpResponseRedirect
+from django.contrib import messages
+import os
+import datetime
+import shutil
+
 
 # Create your views here.
 
 dynamic_doc_path =   Path(__file__).resolve().parent.parent / 'json_files' / 'dynamic_document_values.json'
+base_dir = params.BASE_DIR
 
-class InsertRecord(CreateView):
+
+class InsertRecord(SuccessMessageMixin, CreateView):
     form_class = forms.RecordCreateForm
     success_url = reverse_lazy('home')
     template_name = 'database/record_form.html'
+    success_message = "Record is created successfully!"
+
+    def form_valid(self, form):
+
+        # ask bin file path
+        source_bin_file_path = file_io.ask_file_path(extension='bin')
+
+        if source_bin_file_path == "": # check if user select any bin file.
+            messages.warning(self.request, message='Please select bin file.')
+            return HttpResponseRedirect('/') # return back to home page with warning
+
+
+        # get record object.
+        self.object = form.save(commit=False)
+        """ ___proprocessing of record___ """
+        if self.object.is_special_data:
+        # create reference (absolute path to the data location)
+        #Note: Special data reference structure is different from normal data
+            reference = Path("special_data") / self.object.fo_use_case / self.object.midas_version / self.object.record_type
+        else:
+            # create reference (absolute path to the data location)
+            reference = Path(self.object.fo_use_case) / self.object.midas_version / self.object.project / self.object.region / self.object.record_type / self.object.activity
+
+        if self.object.record_type == "on_demand":
+            if os.path.exists(source_bin_file_path + ".info"):
+                # if bin and info files are stored in the same file.
+                source_info_file_path = source_bin_file_path + ".info"
+            else:
+                # ask info file path
+                source_info_file_path = file_io.ask_file_path(extension='info')
+
+                if source_info_file_path == "": # check if user select any info file.
+                    messages.warning(self.request, message='Please select info file.')
+                    return HttpResponseRedirect('/') # return back to home page with warning
+        else: # handle alarm triggered record
+            # if remove header is true, remove header from alarm triggered file.
+            # access remove_header form element with cleaned data because it isn't model field.
+            if form.cleaned_data['remove_header']:
+                dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                source_info_file_path = source_bin_file_path + '.info'
+                # save info to file
+                file_io.save_to_json(dict_info, source_info_file_path)
+                # set header
+                self.object.at_header = dict_header
+            else:
+                # if user want to insert at file whose header has already extracted.
+                # ask info file path
+                source_info_file_path = file_io.ask_file_path(extension='info')
+
+                if source_info_file_path == "": # check if user select any info file.
+                    messages.warning(self.request, message='Please select info file.')
+                    return HttpResponseRedirect('/') # return back to home page with warning
+
+        # read start and end channel from info file  and calculate iter_num
+        try:
+            start_channel, channel_num = file_io.get_num_channel_from_info(source_info_file_path)
+        except Exception as e:
+                messages.error(self.request, message=e)
+                return HttpResponseRedirect('/') # return back to home page with error
+        end_channel = start_channel + channel_num - 1
+        if start_channel > end_channel:
+                messages.error(self.request, message="Start channel cannot be greater than end channel")
+                return HttpResponseRedirect('/') # return back to home page with error
+
+        # if activity channel didn't specified
+        if self.object.activity_channel is None:
+            self.object.activity_channel = start_channel + round(channel_num/2) # take central channel of the record
+
+        # read info content
+        info_dict = file_io.read_json(source_info_file_path)  # read relevant info file
+        number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_one_sample"])
+        record_notes = info_dict["record_notes"]
+        # get file size
+        record_size = os.path.getsize(source_bin_file_path)  # returns byte
+        # get iteration number from size of bin file.
+        # iter_num = os.path.getsize(source_bin_file_path) / (2 * number_of_channels_in_one_sample * 400)
+        # calculate record length
+        record_length = round(record_size/(2*channel_num*2000))  # seconds
+        # calculate sampling rate
+        if self.object.midas_version != "midas3":
+            sampling_rate = round(10000000/number_of_channels_in_one_sample)
+        else:
+            sampling_rate = None
+
+        # set model values
+        self.object.start_channel = start_channel
+        self.object.end_channel = end_channel
+        self.object.channel_num = channel_num
+        self.object.number_of_channels_in_one_sample = number_of_channels_in_one_sample
+        self.object.record_size = record_size
+        self.object.record_length_in_sec = record_length
+        self.object.sampling_rate = sampling_rate
+
+        # create hash for selected bin and info file
+        self.object.info_file_hash = hash_file(source_info_file_path)
+        self.object.bin_file_hash = hash_file(source_bin_file_path)
+
+        # extract date from selected bin file
+        # if record date key is exist in the relevant info file
+        if "record_date_time" in info_dict.keys():
+            record_date_str = info_dict["record_date_time"]
+            date = record_date_str.split("--")[0]
+            time = record_date_str.split("--")[1]
+            year, month, day = list(map(lambda x: int(x), date.split("-")))  # extracts year/month/day from date string to create datetime object
+            hour, minute, second = list(map(lambda x: int(x), time.split("-")))  # extracts hour, minute, second
+            record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+
+        else: # split by a special convention for bin file to get the record date
+            record_date = source_bin_file_path.split("--")
+            # record_date[1] -> year/month/day , record_date[2]-> hour/minute/second
+            record_date_str = record_date[1] + "--" + record_date[2].split(".")[0]  # extract record date part
+            year, month, day = list(map(lambda x: int(x), record_date[1].split("-")))  # extracts year/month/day from date string to create datetime object
+            hour, minute, second = list(map(lambda x: int(x), record_date[2].split(".")[0].split("-")))  # extracts hour, minute, second
+            record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+
+        self.object.time_of_day = das_util.find_time_of_day(hour)
+        self.object.record_date = record_date_timestamp
+        if self.object.record_notes is None:
+            # if user didn't write any note, use info file's record note section.
+            self.object.record_notes = record_notes
+        destination_file_path = Path(params.BASE_DIR) / reference
+
+        """ handle file naming convention """
+        if self.object.soil_type is None and self.object.distance_to_fo is None:
+            destination_file_name = "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        elif (self.object.soil_type is None) and (not self.object.distance_to_fo is None):
+            destination_file_name = self.object.distance_to_fo + "_" + "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        elif (not self.object.soil_type is None) and (self.object.distance_to_fo is None):
+            destination_file_name = self.object.soil_type + "_" + "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        else:
+            destination_file_name = self.object.soil_type + "_" + self.object.distance_to_fo + "_" + "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        if not self.object.territory is None:
+            destination_file_name = f"{self.object.territory}_" + destination_file_name
+
+        self.object.file_name = destination_file_name
+        self.object.data_full_path = destination_file_path / destination_file_name
+        destination_full_path = destination_file_path / destination_file_name
+
+        if not os.path.exists(destination_full_path):
+            shutil.move(src=source_bin_file_path, dst=destination_full_path)
+            # move info file into file hierarchy
+            shutil.move(src=source_info_file_path, dst=os.path.join(destination_file_path, destination_file_name+".info"))
+        else:
+            messages.error(self.request, message="A file found that contain same full_path with the destination path: " + destination_full_path)
+            return HttpResponseRedirect('/') # return back to home page with error
+
+        """ ___save record___ """
+        self.object.save()
+        print("Saved successfully!!")
+
+        # call super
+        return super().form_valid(form)
 
 
 def load_regions(request): # load list of regions for given project

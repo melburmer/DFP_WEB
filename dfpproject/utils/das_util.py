@@ -3,7 +3,7 @@ import numpy as np
 import os
 from . import file_io
 from scipy import ndimage
-
+from utils import params
 
 def read_raw_data(file_path, channel_start=0, channel_end=5150, time_start_idx=0, time_end_idx=60*2000,
                   channel_num=5150, header_bytes=0, chunk_height=2*60*2000):
@@ -125,8 +125,8 @@ def map_prob_data(prob_data, power_data, category_num, enable_cutter_for_exc, po
             prob_data_mapped[:, :, 2] = np.sum(prob_data[:, :, 5:7], axis=2)
 
     """
-    to apply the AND operation between power and prob data, 
-    the power must be longer by 3 rows than the prob data. 
+    to apply the AND operation between power and prob data,
+    the power must be longer by 3 rows than the prob data.
     """
 
     if power_data.shape[0] <= prob_data.shape[0] + power_data_offset:
@@ -227,6 +227,61 @@ def find_counts(prob_data_mapped, norm_power_data, act, act_start, act_end, prin
     thresh_pass_nums = np.sum(section_interest_prob_binary.astype(int), axis=0)  # sum on time index
 
     return max_act_count_nums, thresh_pass_nums
+
+
+def extract_at_header(at_full_path) -> (dict, dict):
+    dict_info = {}  # extracted info will be stored here.
+
+    at_folder_path = file_io.get_parent_folder(at_full_path)
+    at_file_name = file_io.get_file_name(at_full_path)
+    version_to_run = 'convert_alarm_triggered.exe'
+    exe_folder_path = params.EXE_FOLDER_PATH
+    command_to_run = 'cd ' + exe_folder_path + ' & ' + version_to_run + ' '
+    command_to_run += at_full_path + ' ' + at_folder_path + "\\"
+    err = os.system(command_to_run)
+    if err == 0:
+        result_txt_file_path = os.path.join(at_folder_path, at_file_name + '.txt')
+        txt_content = file_io.read_lines_from_txt(result_txt_file_path)
+        txt_content_keys = list(map(lambda x: x.split(':')[0], txt_content))
+        txt_content_values = list(map(lambda x: float(x.split(':')[1]), txt_content))
+        dict_header = dict(zip(txt_content_keys, txt_content_values))
+        try:
+            # create info file for at.
+            start_channel = int(dict_header["start_channel_number"])
+            end_channel = int(dict_header["end_channel_number"])
+            dict_info['selected_channel_zones'] = [start_channel, end_channel]
+            dict_info['number_of_channels_in_one_sample'] = "5150"
+            dict_info["start_date"], dict_info["end_date"], dict_info["alarm_id"] = at_file_name.split('_')
+            dict_info["record_date_time"] = dict_info["start_date"]
+            dict_info["alarm_id"] = dict_info["alarm_id"].replace(".bin", '')  # remove extension
+
+            """calculate alarm triggered file length in seconds."""
+            start_time = at_file_name.split('_')[0]
+            start_year, start_month, start_day = list(map(lambda x: int(x), start_time.split("--")[0].split("-")))
+            start_hour, start_minute, start_second = list(map(lambda x: int(x), start_time.split("--")[1].split("-")))
+            end_time = at_file_name.split('_')[1]
+            end_year, end_month, end_day = list(map(lambda x: int(x), end_time.split("--")[0].split("-")))
+            end_hour, end_minute, end_second = list(map(lambda x: int(x), end_time.split("--")[1].split("-")))
+
+            start_timestamp = datetime.datetime(start_year, start_month, start_day, start_hour,
+                                                start_minute, start_second)
+            end_timestamp = datetime.datetime(end_year, end_month, end_day, end_hour, end_minute, end_second)
+
+            time_diff_sec = end_timestamp - start_timestamp
+            dict_info['record_length(sec)'] = time_diff_sec.total_seconds()
+            dict_info['record_notes'] = "I'm an alarm triggered file"
+        except IndexError as e:
+            print(e)
+            raise IndexError("Error while extracting info from alarm triggered file: " + at_full_path)
+
+        # delete .txt file
+        os.remove(result_txt_file_path)
+
+    else:
+        print('error in converting ' + at_full_path)
+        raise RuntimeError("Can't run the command: " + command_to_run)
+
+    return dict_info, dict_header
 
 
 def find_time_of_day(h):

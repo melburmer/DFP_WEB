@@ -1,7 +1,9 @@
 # file system and database params
 import os
+from pathlib import Path
 BASE_DIR = "D:/RECORDS"
 ANALYZE_RESULTS_DIR = r"D:\ANALYZE_RESULTS"
+EXE_FOLDER_PATH = Path(__file__).resolve().parent.parent / 'exe_files'
 
 file_system_values = set()
 
@@ -13,7 +15,7 @@ file_system_values = list(file_system_values)
 
 # dpu params
 
-exe_folder_name = "exe_files" 
+exe_folder_name = "exe_files"
 filter_mode_on = False
 filters_to_compare = [
                       '222222',
@@ -21,13 +23,3 @@ filters_to_compare = [
                       '229202',
                       '2211222',
                      ]
-
-
-
-
-
-
-
-
-
-
