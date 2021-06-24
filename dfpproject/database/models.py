@@ -99,6 +99,7 @@ class Records(models.Model):
     end_channel = models.PositiveIntegerField()
     channel_num = models.PositiveIntegerField()
     number_of_channels_in_one_sample = models.PositiveIntegerField()
+    iter_num = models.IntegerField()
     record_size = models.BigIntegerField()
     record_length_in_sec = models.IntegerField()
     sampling_rate = models.IntegerField()

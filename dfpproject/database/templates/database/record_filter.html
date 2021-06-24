@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <br>
+    <div class="row border border-2">
+      <div class="col-2">
+        <br>
+
+          <form method="GET">
+              {% for field in filter.form %}
+                    {{ field.label_tag }}
+                    <br>
+                    {{ field }}
+                  <br>
+              {% endfor %}
+              <br>
+              <input type="submit" value="Filter" class="btn btn-primary btn-lg">
+
+          </form>
+
+          <br>
+
+
+        <br>
+      </div>
+
+      <div class="col-10">
+        <div class="table-responsive">
+            <table class="table table-success table-striped table-hover table-bordered caption-top">
+              <caption>Filter results</caption>
+              <thead>
+                <th scope="col">#</th>
+                <th scope="col">Iter Num</th>
+                <th scope="col">Midas Version</th>
+                <th scope="col">Use Case</th>
+                <th scope="col">Project</th>
+                <th scope="col">Region</th>
+                <th scope="col">Activity</th>
+                <th scope="col">Activity Channel</th>
+                <th scope="col">Soil Type</th>
+                <th scope="col">Distance to Fo</th>
+                <th scope="col">Sensor ID</th>
+                <th scope="col">Record Label</th>
+              </thead>
+              <tbody>
+                {% for obj in filter.qs%}
+                <tr>
+                  <th scope="row"><a href="{% url 'home' %}">{{ forloop.counter }}</a></th>
+                  <td>{{obj.iter_num}}</td>
+                  <td>{{obj.midas_version}}</td>
+                  <td>{{obj.fo_use_case}}</td>
+                  <td>{{obj.project}}</td>
+                  <td>{{obj.region}}</td>
+                  <td>{{obj.activity}}</td>
+                  <td>{{obj.activity_channel}}</td>
+                  <td>{{obj.soil_type}}</td>
+                  <td>{{obj.distance_to_fo}}</td>
+                  <td>{{obj.sensor_id}}</td>
+                  <td>{{obj.record_label}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+
+            </table>
+          <br>
+          <br>
+        </div>
+      </div>
+    </div>
+
+{% endblock %}

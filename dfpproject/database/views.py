@@ -9,6 +9,8 @@ from helper_modules.hashing import hash_file
 from pathlib import Path
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from . import filters
+from . import models
 import os
 import datetime
 import shutil
@@ -99,7 +101,8 @@ class InsertRecord(SuccessMessageMixin, CreateView):
         # get file size
         record_size = os.path.getsize(source_bin_file_path)  # returns byte
         # get iteration number from size of bin file.
-        # iter_num = os.path.getsize(source_bin_file_path) / (2 * number_of_channels_in_one_sample * 400)
+        iter_num = record_size / (2 * number_of_channels_in_one_sample * 400)
+        self.object.iter_num = iter_num
         # calculate record length
         record_length = round(record_size/(2*channel_num*2000))  # seconds
         # calculate sampling rate
@@ -116,6 +119,14 @@ class InsertRecord(SuccessMessageMixin, CreateView):
         self.object.record_size = record_size
         self.object.record_length_in_sec = record_length
         self.object.sampling_rate = sampling_rate
+
+        # make sure user use 'meter' in distance_to_fo attribute
+        try:
+            int(self.object.distance_to_fo)
+            self.object.distance_to_fo = str(self.object.distance_to_fo) + 'm'
+        except ValueError:
+            # it means user use string
+            pass
 
         # create hash for selected bin and info file
         self.object.info_file_hash = hash_file(source_info_file_path)
@@ -181,6 +192,10 @@ class InsertRecord(SuccessMessageMixin, CreateView):
         # call super
         return super().form_valid(form)
 
+
+def record_list(request):
+    f = filters.RecordFilter(request.GET, queryset=models.Records.objects.all())
+    return render(request, 'database/record_filter.html', {'filter':f})
 
 def load_regions(request): # load list of regions for given project
     dynamic_doc = read_json(dynamic_doc_path) # read dynamic doc
