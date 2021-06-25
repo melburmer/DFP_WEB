@@ -9,4 +9,5 @@ urlpatterns = [
     url('ajax/load_acts/', views.load_act_types, name='ajax_load_acts'),
     url('ajax/load_actspecs/', views.load_actspecs, name='ajax_load_actspecs'),
     url(r'^list$', views.record_list, name="filter_list"),
+    url(r'^detail/(?P<pk>\d+)$', views.RecordDetail.as_view(), name='detail'),
 ]

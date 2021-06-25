@@ -44,20 +44,20 @@
               </thead>
               <tbody>
                 {% for obj in filter.qs%}
-                <tr>
-                  <th scope="row"><a href="{% url 'home' %}">{{ forloop.counter }}</a></th>
-                  <td>{{obj.iter_num}}</td>
-                  <td>{{obj.midas_version}}</td>
-                  <td>{{obj.fo_use_case}}</td>
-                  <td>{{obj.project}}</td>
-                  <td>{{obj.region}}</td>
-                  <td>{{obj.activity}}</td>
-                  <td>{{obj.activity_channel}}</td>
-                  <td>{{obj.soil_type}}</td>
-                  <td>{{obj.distance_to_fo}}</td>
-                  <td>{{obj.sensor_id}}</td>
-                  <td>{{obj.record_label}}</td>
-                </tr>
+                  <tr>
+                    <th scope="row"><a href="{% url 'database:detail' pk=obj.pk %}">{{ forloop.counter }}</a></th>
+                    <td>{{obj.iter_num}}</td>
+                    <td>{{obj.midas_version}}</td>
+                    <td>{{obj.fo_use_case}}</td>
+                    <td>{{obj.project}}</td>
+                    <td>{{obj.region}}</td>
+                    <td>{{obj.activity}}</td>
+                    <td>{{obj.activity_channel}}</td>
+                    <td>{{obj.soil_type}}</td>
+                    <td>{{obj.distance_to_fo}}</td>
+                    <td>{{obj.sensor_id}}</td>
+                    <td>{{obj.record_label}}</td>
+                  </tr>
                 {% endfor %}
               </tbody>
 

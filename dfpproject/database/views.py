@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from . import forms
@@ -151,7 +151,7 @@ class InsertRecord(SuccessMessageMixin, CreateView):
 
         self.object.time_of_day = das_util.find_time_of_day(hour)
         self.object.record_date = record_date_timestamp
-        if self.object.record_notes=="":
+        if self.object.record_notes is None:
             # if user didn't write any note, use info file's record note section.
             self.object.record_notes = record_notes
         destination_file_path = Path(params.BASE_DIR) / reference
@@ -190,6 +190,13 @@ class InsertRecord(SuccessMessageMixin, CreateView):
 
         # call super
         return super().form_valid(form)
+
+
+class RecordDetail(DetailView):
+    context_object_name = 'record_detail'
+    model = models.Records
+    template_name = "database/record_detail.html"
+
 
 
 def record_list(request):

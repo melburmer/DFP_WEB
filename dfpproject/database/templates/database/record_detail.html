@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content%}
+  {% if record_detail is not None%}
+      <div class="jumbotron">
+        <h1>Record Detail Page</h1>
+        <table class="table table-dark table-striped table-hover table-borderless caption-top"">
+          <caption>Record Details</caption>
+          <tbody>
+                  <tr>
+                      <td><strong>File Name:</strong></td><td>{{record_detail.file_name}}</td>
+                  </tr>
+                  <tr>
+                      <td><strong>Fo Use Case:</strong></td><td>{{record_detail.fo_use_case}}</td>
+                  </tr>
+                  <tr>
+                      <td><strong>Midas Version:</strong></td><td>{{record_detail.midas_version}}</td>
+                  </tr>
+                  <tr>
+                      <td><strong>Project:</strong></td><td>{{record_detail.project}}</td>
+                  </tr>
+                  <tr>
+                      <td><strong>Region:</strong></td><td>{{record_detail.region}}</td>
+                  </tr>
+                  <tr>
+                      <td><strong>Territory:</strong></td><td>{{record_detail.territory}}</td>
+                  </tr>
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Record Type:</strong></td><td>{{record_detail.record_type}}</td>
+                  </tr>
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Activity:</strong></td><td>{{record_detail.activity}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Activity Channel:</strong></td><td>{{record_detail.activity_channel}}</td>
+                  </tr>
+
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Activity Spec:</strong></td><td>{{record_detail.activity_specification}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Activity Direction:</strong></td><td>{{record_detail.activity_direction}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Soil Type:</strong></td><td>{{record_detail.soil_type}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Distance to Fo:</strong></td><td>{{record_detail.distance_to_fo}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Sensor Id:</strong></td><td>{{record_detail.sensor_id}}</td>
+                  </tr>
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Line or Facility:</strong></td><td>{{record_detail.line_or_facility}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Record Label:</strong></td><td>{{record_detail.record_label}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Start Channel, End Channel, Channel Num:</strong></td><td>{{record_detail.start_channel}}, {{record_detail.end_channel}}, {{record_detail.channel_num}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Time of Day:</strong></td><td>{{record_detail.time_of_day}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Iter Num</strong></td><td>{{record_detail.iter_num}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Sampling Rate:</strong></td><td>{{record_detail.sampling_rate}}</td>
+                  </tr>
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>At Header:</strong></td><td>{{record_detail.at_header}}</td>
+                  </tr>
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Insertion Date:</strong></td><td>{{record_detail.insertion_date}}</td>
+                  </tr>
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Record Date:</strong></td><td>{{record_detail.record_date}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Record Notes:</strong></td><td>{{record_detail.record_notes}}</td>
+                  </tr>
+
+                  <!-- *************** -->
+                  <tr>
+                      <td><strong>Data Location:</strong></td><td>{{record_detail.data_full_path}}</td>
+                  </tr>
+            </tbody>
+
+        </table>
+      </div>
+  {% else%}
+    <h1>No employee data returned.</h1>
+  {% endif %}
+
+{% endblock %}
