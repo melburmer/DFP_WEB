@@ -13,11 +13,11 @@ def mk_ch_dir(d):  # create given input dir and then redirect it.
 
 FILE_DIR = "D:\\"
 
-FILE_HIERARCHY_JSON_PATH = r"C:\Users\aselsan\Desktop\Dataflow_Pipeline\json\file_hierarchy"
-JSON_UG_DIR = os.path.join(os.path.join(os.getcwd(), "json/file_hierarchy"), "ug.json")
-JSON_FENCE_DIR = os.path.join(os.path.join(os.getcwd(), "json/file_hierarchy"), "fence.json")
-JSON_RAILWAY_DIR = os.path.join(os.path.join(os.getcwd(), "json/file_hierarchy"), "railway.json")
-JSON_SPECIAL_DIR = os.path.join(os.path.join(os.getcwd(), "json/file_hierarchy"), "special_data.json")
+FILE_HIERARCHY_JSON_PATH = r"C:\Users\aselsan\Desktop\DFP_WEB\dfpproject\json_files\file_hierarchy"
+JSON_UG_DIR = os.path.join(os.path.join(os.getcwd(), "json_files/file_hierarchy"), "ug.json")
+JSON_FENCE_DIR = os.path.join(os.path.join(os.getcwd(), "json_files/file_hierarchy"), "fence.json")
+JSON_RAILWAY_DIR = os.path.join(os.path.join(os.getcwd(), "json_files/file_hierarchy"), "railway.json")
+JSON_SPECIAL_DIR = os.path.join(os.path.join(os.getcwd(), "json_files/file_hierarchy"), "special_data.json")
 CWD = os.getcwd()
 destination_dirs = os.listdir(FILE_DIR)
 

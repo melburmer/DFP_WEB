@@ -4,8 +4,9 @@ from django import forms
 
 
 class RecordCreateForm(ModelForm):
-
+    sampling_rate = forms.IntegerField(label="Sampling Rate", required=False, initial=2000)
     remove_header = forms.BooleanField(label="Is Alarm Triggered file contain header?", required=False)
+
     class Meta:
         # select fields to show
 
@@ -26,5 +27,6 @@ class RecordCreateForm(ModelForm):
         self.fields['activity'].widget.attrs.update({'id':'ActField','disabled':True})
         self.fields['activity_specification'].widget.attrs.update({'id':'ActSpeField','disabled':True})
         self.fields['is_special_data'].widget.attrs.update({'id':'SpecialDataField'})
+        self.fields['sampling_rate'].widget.attrs.update({'id':'SamplingRateField'})
         self.fields['record_type'].widget.attrs.update({'id':'RecordTypeField'})
         self.fields['remove_header'].widget.attrs.update({'id':'RemoveHeaderField'})

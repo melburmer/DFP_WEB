@@ -103,13 +103,12 @@ class InsertRecord(SuccessMessageMixin, CreateView):
         # get iteration number from size of bin file.
         iter_num = record_size / (2 * number_of_channels_in_one_sample * 400)
         self.object.iter_num = iter_num
+        # sampling Rate
+        sampling_rate = form.cleaned_data['sampling_rate']
+        if sampling_rate is None: # if user didnt input sampling rate.
+            sampling_rate = 2000
         # calculate record length
-        record_length = round(record_size/(2*channel_num*2000))  # seconds
-        # calculate sampling rate
-        if self.object.midas_version != "midas3":
-            sampling_rate = round(10000000/number_of_channels_in_one_sample)
-        else:
-            sampling_rate = None
+        record_length = round(record_size/(2*channel_num*sampling_rate))  # seconds
 
         # set model values
         self.object.start_channel = start_channel
@@ -152,7 +151,7 @@ class InsertRecord(SuccessMessageMixin, CreateView):
 
         self.object.time_of_day = das_util.find_time_of_day(hour)
         self.object.record_date = record_date_timestamp
-        if self.object.record_notes is None:
+        if self.object.record_notes=="":
             # if user didn't write any note, use info file's record note section.
             self.object.record_notes = record_notes
         destination_file_path = Path(params.BASE_DIR) / reference

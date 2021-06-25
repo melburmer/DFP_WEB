@@ -21,6 +21,7 @@ $("#UsecaseField").change(function () {
   var url = $("#InsertRecordForm").attr("data-acts-url");
   var fo_use_case = $(this).val();
 
+
   $.ajax({                       // initialize an AJAX request
     url: url,
     data: {
@@ -70,18 +71,29 @@ $("#RecordTypeField").on('change', function () {
         }
 }).trigger('change');
 
-// here is fore understand is special data checkbox is seleected or not
-// $(document).ready(function(){
-//     $("#SpecialDataField").click(function(){
-//         if($(this).is(":checked")){
-//             $("#ActField").prop('required',false);
-//             $("#ProjectField").prop('required',false);
-//             $("#RegionField").prop('required',false);
-//         }
-//         else if($(this).is(":not(:checked)")){
-//             $("#ActField").prop('required',true);
-//             $("#ProjectField").prop('required',true);
-//             $("#RegionField").prop('required',true);
-//         }
-//     });
-// });
+$("#PostButton").click(function() {
+    if ($('#UsecaseField').find(":selected").text() === "fence")
+    {
+      $("#SamplingRateField").prop('required', true);
+    }
+    else {
+      $("#SamplingRateField").prop('required', false);
+    }
+});
+
+$(document).ready(function(){
+    $("#SpecialDataField").click(function(){
+        if($(this).is(":checked")){
+          console.log("checked")
+            $("#ActField").prop('required',false);
+            $("#ProjectField").prop('required',false);
+            $("#RegionField").prop('required',false);
+        }
+        else if($(this).is(":not(:checked)")){
+          console.log("not checked")
+            $("#ActField").prop('required',true);
+            $("#ProjectField").prop('required',true);
+            $("#RegionField").prop('required',true);
+        }
+    });
+});
