@@ -118,6 +118,13 @@
             </tbody>
 
         </table>
+        <div class="container">
+          <a href="{% url 'database:update' pk=record_detail.pk %}" class="btn btn-warning btn-lg">Update</a>
+          <a href="{% url 'database:delete' pk=record_detail.pk %}" class="btn btn-danger btn-lg">Delete</a>
+          <a href="{% url 'database:filter_list' %}" class="btn btn-primary btn-lg">Back</a>
+
+        </div>
+
       </div>
   {% else%}
     <h1>No employee data returned.</h1>

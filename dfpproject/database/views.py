@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from . import forms
@@ -192,11 +192,156 @@ class InsertRecord(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
+class UpdateRecord(SuccessMessageMixin, UpdateView):
+    form_class = forms.RecordCreateForm
+    success_url = reverse_lazy('home')
+    success_message = "Record is updated successfully!"
+    template_name = 'database/record_form.html'
+    model = models.Records
+
+    def form_valid(self, form):
+        # get object record_date
+        self.object = form.save(commit=False)
+        # source bin file path = data full path
+        source_bin_file_path = self.object.data_full_path
+        source_info_file_path = source_bin_file_path + ".info"
+
+        # recalculate reference
+        if self.object.is_special_data:
+        # create reference (absolute path to the data location)
+        #Note: Special data reference structure is different from normal data
+            reference = Path("special_data") / self.object.fo_use_case / self.object.midas_version / self.object.record_type
+        else:
+            # create reference (absolute path to the data location)
+            reference = Path(self.object.fo_use_case) / self.object.midas_version / self.object.project / self.object.region / self.object.record_type / self.object.activity
+
+        if self.object.record_type == "alarm_triggered":
+            if form.cleaned_data['remove_header']:
+                dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                # save info to file
+                file_io.save_to_json(dict_info, source_info_file_path)
+                # set header
+                self.object.at_header = dict_header
+
+        # read start and end channel from info file  and calculate iter_num
+        try:
+            start_channel, channel_num = file_io.get_num_channel_from_info(source_info_file_path)
+        except Exception as e:
+                messages.error(self.request, message=e)
+                return HttpResponseRedirect('/') # return back to home page with error
+        end_channel = start_channel + channel_num - 1
+        if start_channel > end_channel:
+                messages.error(self.request, message="Start channel cannot be greater than end channel")
+                return HttpResponseRedirect('/') # return back to home page with error
+
+        # if activity channel didn't specified
+        if self.object.activity_channel is None:
+            self.object.activity_channel = start_channel + round(channel_num/2) # take central channel of the record
+
+        # read info content
+        info_dict = file_io.read_json(source_info_file_path)  # read relevant info file
+        number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_one_sample"])
+        record_notes = info_dict["record_notes"]
+        # get file size
+        record_size = os.path.getsize(source_bin_file_path)  # returns byte
+        # get iteration number from size of bin file.
+        iter_num = record_size / (2 * number_of_channels_in_one_sample * 400)
+        self.object.iter_num = iter_num
+        # sampling Rate
+        sampling_rate = form.cleaned_data['sampling_rate']
+        if sampling_rate is None: # if user didnt input sampling rate.
+            sampling_rate = 2000
+        # calculate record length
+        record_length = round(record_size/(2*channel_num*sampling_rate))  # seconds
+
+        # set model values
+        self.object.start_channel = start_channel
+        self.object.end_channel = end_channel
+        self.object.channel_num = channel_num
+        self.object.number_of_channels_in_one_sample = number_of_channels_in_one_sample
+        self.object.record_size = record_size
+        self.object.record_length_in_sec = record_length
+        self.object.sampling_rate = sampling_rate
+
+        # make sure user use 'meter' in distance_to_fo attribute
+        try:
+            int(self.object.distance_to_fo)
+            self.object.distance_to_fo = str(self.object.distance_to_fo) + 'm'
+        except ValueError:
+            # it means user use string
+            pass
+
+        # extract date from selected bin file
+        # if record date key is exist in the relevant info file
+        if "record_date_time" in info_dict.keys():
+            record_date_str = info_dict["record_date_time"]
+            date = record_date_str.split("--")[0]
+            time = record_date_str.split("--")[1]
+            year, month, day = list(map(lambda x: int(x), date.split("-")))  # extracts year/month/day from date string to create datetime object
+            hour, minute, second = list(map(lambda x: int(x), time.split("-")))  # extracts hour, minute, second
+            record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+
+        else: # split by a special convention for bin file to get the record date
+            record_date = source_bin_file_path.split("--")
+            # record_date[1] -> year/month/day , record_date[2]-> hour/minute/second
+            record_date_str = record_date[1] + "--" + record_date[2].split(".")[0]  # extract record date part
+            year, month, day = list(map(lambda x: int(x), record_date[1].split("-")))  # extracts year/month/day from date string to create datetime object
+            hour, minute, second = list(map(lambda x: int(x), record_date[2].split(".")[0].split("-")))  # extracts hour, minute, second
+            record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+
+        if self.object.record_notes is None:
+            # if user didn't write any note, use info file's record note section.
+            self.object.record_notes = record_notes
+
+        destination_file_path = Path(params.BASE_DIR) / reference
+
+        """ handle file naming convention """
+        if self.object.soil_type is None and self.object.distance_to_fo is None:
+            destination_file_name = "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        elif (self.object.soil_type is None) and (not self.object.distance_to_fo is None):
+            destination_file_name = self.object.distance_to_fo + "_" + "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        elif (not self.object.soil_type is None) and (self.object.distance_to_fo is None):
+            destination_file_name = self.object.soil_type + "_" + "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        else:
+            destination_file_name = self.object.soil_type + "_" + self.object.distance_to_fo + "_" + "ch" + str(self.object.activity_channel) + "--" + record_date_str + ".bin"
+
+        if not self.object.territory is None:
+            destination_file_name = f"{self.object.territory}_" + destination_file_name
+
+        self.object.file_name = destination_file_name
+        self.object.data_full_path = destination_file_path / destination_file_name
+        destination_full_path = destination_file_path / destination_file_name
+
+        if not source_bin_file_path == destination_full_path:
+            shutil.move(src=source_bin_file_path, dst=destination_full_path)
+            # move info file into file hierarchy
+            shutil.move(src=source_info_file_path, dst=os.path.join(destination_file_path, destination_file_name+".info"))
+        return super().form_valid(form)
+
+
 class RecordDetail(DetailView):
     context_object_name = 'record_detail'
     model = models.Records
     template_name = "database/record_detail.html"
 
+
+class DeleteRecord(SuccessMessageMixin, DeleteView):
+    model = models.Records
+    success_url = reverse_lazy('home')
+    success_message = "Record is deleted successfully!"
+
+    def delete(self, *args, **kwargs):
+        self.object = self.get_object()
+
+        # delete record from file hierarchy
+        bin_file_path = self.object.data_full_path
+        info_file_path = bin_file_path + ".info"
+        os.remove(bin_file_path)
+        os.remove(info_file_path)
+        return super().delete(*args, **kwargs)
 
 
 def record_list(request):
