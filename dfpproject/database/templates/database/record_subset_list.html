@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+  <h1><strong>Please select records from list</strong></h1>
+
+{% if records %}
+  {% for obj in records %}
+    <p>{{obj.midas_version}}</p>
+  {% endfor %}
+
+{%else%}
+  <h5>Cannot found any record that match with specified filter.</h5>
+
+{% endif %}
+{% endblock %}

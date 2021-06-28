@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import CreateView, DetailView, UpdateView, DeleteView, ListView
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from . import forms
@@ -344,9 +344,28 @@ class DeleteRecord(SuccessMessageMixin, DeleteView):
         return super().delete(*args, **kwargs)
 
 
+class RecordSelectSubset(ListView):
+    model = models.Records
+    template_name = "database/record_subset_list.html"
+    context_object_name = "records"
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        filtered_list = filters.RecordFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
+
+# return filter to the record_filter.html (filter result and filter form are shown in same page.)
 def record_list(request):
     f = filters.RecordFilter(request.GET, queryset=models.Records.objects.all())
     return render(request, 'database/record_filter.html', {'filter':f})
+
+
+# return filter to the record_select_filter.html (filter result and filter form are shown in difference page.)
+def select_subset_list(request):
+    f = filters.RecordFilter(request.GET, queryset=models.Records.objects.all())
+    return render(request, 'database/record_subset_filter.html', {'filter':f})
+
 
 def load_regions(request): # load list of regions for given project
     dynamic_doc = read_json(dynamic_doc_path) # read dynamic doc

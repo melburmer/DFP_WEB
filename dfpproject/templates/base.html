@@ -40,9 +40,9 @@
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="{% url 'database:insert' %}">Insert Data</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'database:filter_list' %}">Filter Data</a></li>
+                <li><a class="dropdown-item" href="{% url 'database:filter' %}">Filter Data</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Delete Data</a></li>
+                <li><a class="dropdown-item" href="{% url 'database:select_subset_filter' %}">Delete Data</a></li>
               </ul>
             </li>
 

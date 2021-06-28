@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+
+<form method="GET", action="{% url 'database:select_subset' %}">
+    {% for field in filter.form %}
+          {{ field.label_tag }}
+          <br>
+          {{ field }}
+        <br>
+    {% endfor %}
+    <br>
+    <input type="submit" value="Filter" class="btn btn-primary btn-lg">
+
+</form>
+
+
+{% endblock %}
