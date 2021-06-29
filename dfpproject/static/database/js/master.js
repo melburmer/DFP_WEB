@@ -97,3 +97,14 @@ $(document).ready(function(){
         }
     });
 });
+
+
+// select all button click handler
+// check all checkbox in the form.
+$( "#SelectAllButton").click(function() {
+   $(".SubsetCb").prop('checked', true);
+});
+
+$( "#UncheckButton").click(function() {
+   $(".SubsetCb").prop('checked', false);
+});

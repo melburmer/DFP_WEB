@@ -355,6 +355,33 @@ class RecordSelectSubset(ListView):
         return filtered_list.qs
 
 
+
+# delete selected data
+def delete_many(request):
+    pk_to_delete = request.POST.getlist('checks')
+    if not pk_to_delete:
+        # if empty list
+        messages.warning(request, message="Please select data to delete")
+        return HttpResponseRedirect('/')
+    for pk in pk_to_delete:
+        try:
+            record_obj = models.Records.objects.get(pk=pk)
+            # delete raw database
+            rawdata_path_to_delete = record_obj.data_full_path
+            info_path_to_delete = rawdata_path_to_delete + ".info"
+            os.remove(rawdata_path_to_delete)
+            os.remove(info_path_to_delete)
+            # delete record object
+            record_obj.delete()
+
+        except Exception as e:
+            messages.error(request, message=e)
+            return HttpResponseRedirect('/')
+
+    messages.success(request, message="Selected data are successfuly deleted.")
+    return HttpResponseRedirect('/')
+
+
 # return filter to the record_filter.html (filter result and filter form are shown in same page.)
 def record_list(request):
     f = filters.RecordFilter(request.GET, queryset=models.Records.objects.all())
