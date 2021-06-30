@@ -109,7 +109,7 @@ class Records(models.Model):
     record_date = models.DateTimeField()
     record_notes = models.TextField(max_length=250, blank=True, default="")
     at_header = djongo_model.EmbeddedField(model_container=Atheader, null=True)
-    data_full_path = models.CharField(max_length=100, unique=True, default="")
+    data_full_path = models.CharField(max_length=250, unique=True, default="")
 
     class Meta:
         ordering = ['-insertion_date']
