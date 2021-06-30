@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.HomePage.as_view(), name='home'),
     url(r'^database/', include('database.urls', namespace='database')),
+    url(r'^analyze/', include('analyze.urls', namespace='analyze')),
 ]
