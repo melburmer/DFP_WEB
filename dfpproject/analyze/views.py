@@ -11,7 +11,8 @@ from django.contrib import messages
 import os
 from utils import params, file_io
 # Create your views here.
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, TemplateView
+
 
 class CreateTestset(SuccessMessageMixin, CreateView):
     template_name = 'analyze/create_testset.html'
@@ -82,6 +83,10 @@ class RecordSelectSubset(ListView):
         qs = self.model.objects.all()
         filtered_list = RecordFilter(self.request.GET, queryset=qs)
         return filtered_list.qs
+
+
+class AnalyzeTestSet(TemplateView):
+    template_name = "analyze/analyze_options.html"
 
 # return filter to the record_select_filter.html (filter result and filter form are shown in difference page.)
 def select_subset_filter(request):
