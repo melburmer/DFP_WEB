@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^detail/(?P<pk>\d+)$', views.RecordDetail.as_view(), name='detail'),
     url(r'^update/(?P<pk>\d+)$', views.UpdateRecord.as_view(), name='update'),
     url(r'^delete/(?P<pk>\d+)$', views.DeleteRecord.as_view(), name='delete'),
-    url(r'^select_subset_filter$', views.select_subset_list, name="select_subset_filter"),
+    url(r'^select_subset_filter$', views.select_subset_filter, name="select_subset_filter"),
     url(r'^select_subset$', views.RecordSelectSubset.as_view(), name="select_subset"),
     url(r'^delete_many$', views.delete_many, name="delete_selected_data"),
 ]

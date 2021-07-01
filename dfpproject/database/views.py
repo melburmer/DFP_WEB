@@ -389,7 +389,7 @@ def record_list(request):
 
 
 # return filter to the record_select_filter.html (filter result and filter form are shown in difference page.)
-def select_subset_list(request):
+def select_subset_filter(request):
     f = filters.RecordFilter(request.GET, queryset=models.Records.objects.all())
     return render(request, 'database/record_subset_filter.html', {'filter':f})
 
