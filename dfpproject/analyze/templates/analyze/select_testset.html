@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+{% if testsets%}
+    <h1><strong>Please select test set</strong></h1>
+
+    <form class="TestSetForm" action="{% url 'analyze:analyze_testset'%}" method="GET">
+      {% csrf_token %}
+      <table class="table table-stripe table-hover">
+        <thead>
+          <tr>
+            <th scope="col"><strong>Selection</strong></th>
+            <th scope="col"><strong>Test Set Name</strong></th>
+            <th scope="col"><strong>Models to Run</strong></th>
+            <th scope="col"><strong>Acts to Run</strong></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for testset in testsets %}
+            <tr>
+                <td><input type="radio"  class="form-check-input TestsetCb" name="radio_check" value= {{testset.pk}}></td>
+                <td>{{testset.test_set_name}}</td>
+                <td>{{testset.models_to_run}}</td>
+                <td>{{testset.acts_to_run}}</td>
+            </tr>
+
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+      <input type="submit" value="Select" class="btn btn-success btn-lg">
+    </form>
+
+
+{% else %}
+  <h3>Cannot found any test set, please create one</h3>
+
+{% endif %}
+{% endblock %}

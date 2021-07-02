@@ -73,7 +73,6 @@ class CreateTestset(SuccessMessageMixin, CreateView):
 
 
 
-
 class RecordSelectSubset(ListView):
     model = db_model.Records
     template_name = "analyze/record_subset_list.html"
@@ -85,10 +84,23 @@ class RecordSelectSubset(ListView):
         return filtered_list.qs
 
 
+class SelectTestSet(ListView):
+    template_name = "analyze/select_testset.html"
+    context_object_name = "testsets"
+    model = models.Testset
+
+
+
 class AnalyzeTestSet(TemplateView):
     template_name = "analyze/analyze_options.html"
+
+
 
 # return filter to the record_select_filter.html (filter result and filter form are shown in difference page.)
 def select_subset_filter(request):
     f = RecordFilter(request.GET, queryset=models.Records.objects.all())
     return render(request, 'analyze/record_subset_filter.html', {'filter':f})
+
+
+# calculate power prob for selected test set
+#def calculate_power_prob(request):
