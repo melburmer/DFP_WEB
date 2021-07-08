@@ -2,13 +2,15 @@
 
 
 {% block content %}
+
+
   <br>
   <br>
   <div class="AnalysisOptionsDiv jumbotron container">
     <br>
-    <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:calculate_power_prob'%}">Calculate Power Prob</a>
+    <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:calculate_power_prob' pk=selected_pk %} ">Calculate Power Prob</a>
     <br>
-    <a class="btn btn-primary btn-lg AnalysisButton" href="#">Calculate Roc Curves</a>
+    <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:calculate_roc_curves' pk=selected_pk %} ">Calculate Roc Curves</a>
     <br>
     <a class="btn btn-primary btn-lg AnalysisButton" href="#">Visualize Power Prob</a>
     <br>
