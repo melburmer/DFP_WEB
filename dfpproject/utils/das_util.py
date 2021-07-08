@@ -137,7 +137,7 @@ def map_prob_data(prob_data, power_data, category_num, enable_cutter_for_exc, po
 
 
 def find_counts(prob_data_mapped, norm_power_data, act, act_start, act_end, print_every=100):
-    ANALYZE_PARAMS = file_io.read_json(".\\json\\analyze\\analyze_params.json")
+    ANALYZE_PARAMS = file_io.read_json("json_files/analyze/analyze_params.json")
 
     # find appropriate index to use fetch analyze params for current act.
     act_type_index = ANALYZE_PARAMS["activity_names"].index(act)
