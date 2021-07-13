@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from . import models
+from django.shortcuts import render, redirect
+from . import models, visualize
 from django.forms.models import model_to_dict
 from database import models as db_model
 from django.contrib.messages.views import SuccessMessageMixin
@@ -9,12 +9,13 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 from decorators.decorators import timer
+from scipy import ndimage
 import os
+import matplotlib.pyplot as plt
 import numpy as np
 import shutil
 from analyze.dpu import Dpu
 from utils import params, file_io, das_util
-from . import visualize
 # Create your views here.
 from django.views.generic import CreateView, ListView, TemplateView
 
@@ -423,3 +424,173 @@ def calculate_roc_curves(request, pk):
             return HttpResponseRedirect('/')
 
         return HttpResponseRedirect('/')
+
+
+def select_test_data_subset(request, caller_id, pk):
+    # get test set object
+    test_set = models.Testset.objects.get(pk=pk)
+    data_set = test_set.data_set
+
+    return render(request, "analyze/select_test_data_subset.html",
+                {'data_set':data_set, 'pk':pk, 'caller_id':caller_id})
+
+
+def route_selected_testset_subset(request, caller_id, test_set_pk):
+    selected_data_hash_list = request.POST.getlist('checks')
+    # store it into the session to use i another view
+    request.session['selected_data_hash_list'] = selected_data_hash_list
+    # route subset data to the functions based on caller id.
+
+    if caller_id == 2:
+        return redirect("analyze:visualize_power_prob", test_set_pk=test_set_pk)
+
+def visualize_power_prob(request, test_set_pk):
+
+    # get some params to visualization
+    VIS_POWER_PROB_PARAMS = file_io.read_json("json_files/analyze/power_prob_visualize_params.json")
+    activity_indices = VIS_POWER_PROB_PARAMS["activity_indices"]
+    activity_names = VIS_POWER_PROB_PARAMS["activity_names"]
+    activity_prob_threshes = VIS_POWER_PROB_PARAMS["activity_prob_threshes"]
+    activity_norm_power_threshes = VIS_POWER_PROB_PARAMS["activity_norm_power_threshes"]
+    activity_windows = VIS_POWER_PROB_PARAMS["activity_windows"]
+    fs_norm_power = VIS_POWER_PROB_PARAMS["fs_norm_power"]
+    time_end_idx = 5 * 60 * 60 * fs_norm_power  # 5 hours
+    im_show_off = False
+    colormap = plt.get_cmap('jet')
+
+    # get data to visualize
+    selected_data_hash_list = request.session['selected_data_hash_list']
+    test_set = models.Testset.objects.get(pk=test_set_pk).__dict__
+    models_to_run = test_set["models_to_run"]
+    acts_to_run = test_set["acts_to_run"]
+    data_set = test_set["data_set"]
+    results_path = test_set["results_path"]
+    probs_folder_path = os.path.join(results_path, "probs")  # probs are under here.
+    power_results_folder_path = os.path.join(results_path, "powers")  # powers are under here.
+    #colormap = plt.get_cmap('jet')
+
+
+    is_any_data_analyzed = False
+    # foreach model
+    for model_idx, model_id in enumerate(models_to_run):
+        model_id = int(model_id)
+        # get model prob results folder path
+        model_results_folder = os.path.join(probs_folder_path, "model_"+str(model_id))
+        prob_results_folder_path = os.path.join(model_results_folder, "prob_results")
+        category_num = -1
+        if model_id == 0:
+            category_num = 14
+        elif model_id in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19]:
+            category_num = 5
+        else:
+            messages.warning(request, message=f"Model cannot be found, Model Id: {model_id}")
+            return HttpResponseRedirect('/') # return back to home page with warning
+
+        for data_idx, data_doc in enumerate(data_set):
+            vis_start_ch = 0
+            vis_end_ch = 5150
+            if data_doc["bin_file_hash"] in selected_data_hash_list:
+                start_channel = data_doc["start_channel"]
+                end_channel = data_doc["end_channel"]
+                channel_num = data_doc["channel_num"]
+                activity_channel = data_doc["activity_channel"]
+                raw_data_file_name = data_doc["file_name"]
+
+                # Skip for loop if the power and the prob values were not extracted for the given raw data.
+                if not is_power_prob_extracted(results_path, prob_results_folder_path, raw_data_file_name):
+                    continue
+                is_any_data_analyzed = True  # This variable will be False if all selected data are skipped.
+
+                for cur_act in acts_to_run:
+                    act_idx = activity_names.index(cur_act)
+                    cur_prob_threshes = activity_prob_threshes[act_idx]
+                    cur_category_idx = activity_indices[act_idx]
+                    cur_window_size = activity_windows[act_idx]
+                    cur_norm_power_thresh = activity_norm_power_threshes[act_idx]
+
+                    # images will be saved under the img_results_folder_path
+                    img_results_folder_path = os.path.join(results_path, "power_prob_visualisation")
+                    if not os.path.exists(img_results_folder_path):  # crete image output folder if not exist.
+                        file_io.create_folder(img_results_folder_path)
+
+                    """ read norm power for given data"""
+                    cur_power_data_path = os.path.join(power_results_folder_path, raw_data_file_name+'_power.pow')
+                    cur_power_data = das_util.read_norm_power(cur_power_data_path, channel_start=vis_start_ch,
+                                                              channel_end=vis_end_ch, time_start_idx=0,
+                                                              time_end_idx=2*time_end_idx, channel_num=channel_num)
+                    cur_norm_power = cur_power_data[1::2, :]
+                    min_norm_power = -30
+                    max_norm_power = 30
+                    cur_norm_power = cur_norm_power.clip(min_norm_power, max_norm_power)
+
+                    """read prob for given data"""
+                    cur_prob_data_path = os.path.join(prob_results_folder_path, raw_data_file_name + '_prob.prob')
+                    cur_prob_data = das_util.read_prob_data(cur_prob_data_path, channel_start=vis_start_ch,
+                                                            channel_end=vis_end_ch, time_start_idx=0,
+                                                            time_end_idx=time_end_idx, channel_num=channel_num,
+                                                            category_num=category_num, category_idx=cur_category_idx)
+
+                    prob_data_row_num = cur_prob_data.shape[0]
+                    real_cur_window_size = min(prob_data_row_num, cur_window_size)
+                    cur_kernel = np.ones((real_cur_window_size, 1))
+
+                    # create figure for prob data
+                    plt.figure()
+                    extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
+                              prob_data_row_num, 0]
+                    plt.imshow(cur_prob_data, extent=extent, aspect='auto', cmap=colormap)
+                    plt.colorbar()
+                    title_str = 'Prob results for -> Model: {0}, Act:{1}'.format(model_id, cur_act)
+                    plt.xlabel("Channels")
+                    plt.ylabel("Time index")
+                    plt.title(title_str)
+                    prob_data_img_name = raw_data_file_name + f"-prob_model{model_id}_{cur_act}.png"
+                    prob_data_img_save_path = os.path.join(img_results_folder_path, prob_data_img_name)
+                    # save prob data figure.
+                    plt.savefig(prob_data_img_save_path)
+
+                    # create figure for norm power
+                    plt.figure()
+                    extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
+                              cur_norm_power.shape[0], 0]
+                    plt.imshow(cur_norm_power, extent=extent, aspect='auto', cmap=colormap)
+                    plt.colorbar()
+                    plt.title('Norm Power [{}, {}] clipped'.format(min_norm_power, max_norm_power))
+                    plt.xlabel("Channels")
+                    plt.ylabel("Time index")
+                    norm_power_data_img_save_path = os.path.join(img_results_folder_path,
+                                                                 raw_data_file_name + "-norm_power.png")
+                    # save norm power data figure
+                    plt.savefig(norm_power_data_img_save_path)
+
+                    # calculate and visualize act count
+                    n_diff_prob = len(cur_prob_threshes)
+                    for prob_idx in range(n_diff_prob):
+                        cur_prob_thresh = cur_prob_threshes[prob_idx]
+                        prob_thresh_passing = (cur_prob_data > cur_prob_thresh) * 1  # bool to 1 and 0
+                        norm_power_thresh_passing = (cur_norm_power > cur_norm_power_thresh) * 1
+                        power_prob_anded = (prob_thresh_passing[0::, :] & norm_power_thresh_passing[3:-3:, :]).astype(int)
+                        act_counts = ndimage.convolve(power_prob_anded, cur_kernel)
+
+                        plt.figure()
+                        extent = [vis_start_ch + start_channel, vis_end_ch + start_channel,
+                                  power_prob_anded.shape[0], 0]
+                        plt.imshow(act_counts, extent=extent, aspect='auto', cmap=colormap)
+                        plt.colorbar()
+                        plt.title(title_str+', Activity counts')
+                        plt.xlabel("Channels")
+                        plt.ylabel("Time index")
+                        act_count_img_save_path = os.path.join(img_results_folder_path,
+                                                               raw_data_file_name + "-act_count.png")
+                        plt.savefig(act_count_img_save_path)
+
+
+                    plt.show()
+                    if im_show_off:
+                        plt.close("all")
+                    print('cur activity ' + cur_act + ' {}/{}'.format(act_idx + 1, len(acts_to_run)))
+
+                print('cur data: ' + raw_data_file_name + ', data progress: {0}/{1}'.format(data_idx+1, len(data_set)))
+
+
+    return HttpResponseRedirect("/")
