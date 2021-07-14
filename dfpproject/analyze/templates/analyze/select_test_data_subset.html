@@ -8,10 +8,13 @@
     <button type="button" name="button" class="btn btn-secondary btn-lg" id="UncheckButton">Uncheck</button>
     <form action="{% url 'analyze:route_selected_testset_subset' caller_id=caller_id test_set_pk=pk%}" method="POST">
       {% csrf_token %}
+      <div class="table-responsive">
       <table class="table table-stripe table-hover">
         <thead>
           <tr>
             <th scope="col"><strong>Selections</strong></th>
+            <th scope="col"><strong>Visualization Start Ch</strong></th>
+            <th scope="col"><strong>Visualization Start Ch</strong></th>
             <th scope="col"><strong>Fo use case</strong></th>
             <th scope="col"><strong>Midas Version</strong></th>
             <th scope="col"><strong>Project</strong></th>
@@ -20,6 +23,7 @@
             <th scope="col"><strong>Act</strong></th>
             <th scope="col"><strong>Act Spec.</strong></th>
             <th scope="col"><strong>Act Direc.</strong></th>
+            <th scope="col"><strong>Act Ch.</strong></th>
             <th scope="col"><strong>Distance to fo</strong></th>
             <th scope="col"><strong>Soil Type</strong></th>
             <th scope="col"><strong>Start Ch.</strong></th>
@@ -35,6 +39,8 @@
           {% for obj in data_set %}
             <tr>
                 <td><input type="checkbox"  class="form-check-input SubsetCb" name="checks" value= {{obj.bin_file_hash}}></td>
+                <td><input type="text"  class="form-control" name="start_{{obj.bin_file_hash}}" placeholder="start_ch"></td>
+                <td><input type="text"  class="form-control" name="end_{{obj.bin_file_hash}}" placeholder="end_ch"></td>
                 <td>{{obj.fo_use_case}}</td>
                 <td>{{obj.midas_version}}</td>
                 <td>{{obj.project}}</td>
@@ -43,6 +49,7 @@
                 <td>{{obj.activity}}</td>
                 <td>{{obj.activity_specification}}</td>
                 <td>{{obj.activity_direction}}</td>
+                <td>{{obj.activity_channel}}</td>
                 <td>{{obj.distance_to_fo}}</td>
                 <td>{{obj.soil_type}}</td>
                 <td>{{obj.start_channel}}</td>
@@ -57,6 +64,8 @@
         </tbody>
 
       </table>
+      </div>
+      <br>
       <input type="submit" value="Select" class="btn btn-success btn-lg">
     </form>
 

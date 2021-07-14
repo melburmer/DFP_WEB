@@ -16,4 +16,5 @@ urlpatterns = [
     path('calculate_roc_curves/<int:pk>', views.calculate_roc_curves, name='calculate_roc_curves'),
     path('select_test_data_subset/<int:caller_id>/<int:pk>', views.select_test_data_subset, name='select_test_data_subset'),
     path('visualize_power_prob/<int:test_set_pk>', views.visualize_power_prob, name='visualize_power_prob'),
+
 ]

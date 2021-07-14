@@ -12,6 +12,7 @@ from decorators.decorators import timer
 from scipy import ndimage
 import os
 import matplotlib.pyplot as plt
+import plotly.express as px
 import numpy as np
 import shutil
 from analyze.dpu import Dpu
@@ -246,6 +247,7 @@ def calculate_roc_curves(request, pk):
         dict_models = {}  # it will be used to store models' results.
         is_any_data_analyzed = False
 
+        models_to_run = models_to_run.split(',') # models to run stored as "1,2,3", so split it and create list
         for model_idx, model_id in enumerate(models_to_run):
             model_id = int(model_id)
             dict_models['model_' + str(model_id)] = {}
@@ -437,12 +439,28 @@ def select_test_data_subset(request, caller_id, pk):
 
 def route_selected_testset_subset(request, caller_id, test_set_pk):
     selected_data_hash_list = request.POST.getlist('checks')
-    # store it into the session to use i another view
+    # store it into the session to use in another view
     request.session['selected_data_hash_list'] = selected_data_hash_list
-    # route subset data to the functions based on caller id.
+    # get start and end channel inputs
+    start_channels = {}
+    end_channels = {}
 
+
+    for hash_val in selected_data_hash_list:
+        start_channels[hash_val] = request.POST.get('start_'+ str(hash_val))
+        end_channels[hash_val] = request.POST.get('end_'+ str(hash_val))
+
+    # add start and end channel inputs to the session.
+    request.session['start_channels'] = start_channels
+    request.session['end_channels'] = end_channels
+
+    # route subset data to the functions based on caller id.
     if caller_id == 2:
+        # redirect selected data to the visualize power prob
         return redirect("analyze:visualize_power_prob", test_set_pk=test_set_pk)
+
+    if caller_id == 3:
+        # redirect selected data to the visualize spectrogram
 
 def visualize_power_prob(request, test_set_pk):
 
@@ -460,8 +478,17 @@ def visualize_power_prob(request, test_set_pk):
 
     # get data to visualize
     selected_data_hash_list = request.session['selected_data_hash_list']
+    if not selected_data_hash_list: # if user do not select any data
+        messages.warning(request, message="Please select data")
+        return HttpResponseRedirect('/')
+
+    # read vis start and vis and channels
+    vis_start_channels = request.session['start_channels']
+    vis_end_channels = request.session['end_channels']
+
     test_set = models.Testset.objects.get(pk=test_set_pk).__dict__
     models_to_run = test_set["models_to_run"]
+    models_to_run = models_to_run.split(',') # models to run stored as "1,2,3", so split it and create list
     acts_to_run = test_set["acts_to_run"]
     data_set = test_set["data_set"]
     results_path = test_set["results_path"]
@@ -477,19 +504,40 @@ def visualize_power_prob(request, test_set_pk):
         # get model prob results folder path
         model_results_folder = os.path.join(probs_folder_path, "model_"+str(model_id))
         prob_results_folder_path = os.path.join(model_results_folder, "prob_results")
+        if not os.path.exists(prob_results_folder_path):
+            print(f"Prob results for model{model_id} are not exists")
+            continue
+
         category_num = -1
         if model_id == 0:
             category_num = 14
         elif model_id in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19]:
             category_num = 5
         else:
+
             messages.warning(request, message=f"Model cannot be found, Model Id: {model_id}")
             return HttpResponseRedirect('/') # return back to home page with warning
 
         for data_idx, data_doc in enumerate(data_set):
-            vis_start_ch = 0
-            vis_end_ch = 5150
             if data_doc["bin_file_hash"] in selected_data_hash_list:
+                # read start and end channels of given data for visualisation.
+
+                if vis_start_channels[data_doc["bin_file_hash"]] == "" or vis_start_channels[data_doc["bin_file_hash"]].isdigit() == False or int(vis_start_channels[data_doc["bin_file_hash"]])<0:
+                    vis_start_ch = data_doc["start_channel"]
+                else:
+                    #  if start channel didnt given.
+                    vis_start_ch = int(vis_start_channels[data_doc["bin_file_hash"]])
+
+                if vis_end_channels[data_doc["bin_file_hash"]] == "" or vis_end_channels[data_doc["bin_file_hash"]].isdigit() == False or int(vis_end_channels[data_doc["bin_file_hash"]])>5150:
+                    vis_end_ch = data_doc["end_channel"]
+                else:
+                    #  if end channel didnt given.
+                    vis_end_ch = int(vis_end_channels[data_doc["bin_file_hash"]])
+
+                if vis_end_ch < vis_start_ch:
+                    # set default start and end channels
+                    vis_start_ch = data_doc["start_channel"]
+                    vis_end_ch = data_doc["end_channel"]
                 start_channel = data_doc["start_channel"]
                 end_channel = data_doc["end_channel"]
                 channel_num = data_doc["channel_num"]
@@ -535,7 +583,7 @@ def visualize_power_prob(request, test_set_pk):
                     cur_kernel = np.ones((real_cur_window_size, 1))
 
                     # create figure for prob data
-                    plt.figure()
+                    #plt.figure()
                     extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
                               prob_data_row_num, 0]
                     plt.imshow(cur_prob_data, extent=extent, aspect='auto', cmap=colormap)
@@ -548,7 +596,8 @@ def visualize_power_prob(request, test_set_pk):
                     prob_data_img_save_path = os.path.join(img_results_folder_path, prob_data_img_name)
                     # save prob data figure.
                     plt.savefig(prob_data_img_save_path)
-
+                    #fig = px.imshow(cur_prob_data)
+                    #fig.show()
                     # create figure for norm power
                     plt.figure()
                     extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
@@ -592,5 +641,9 @@ def visualize_power_prob(request, test_set_pk):
 
                 print('cur data: ' + raw_data_file_name + ', data progress: {0}/{1}'.format(data_idx+1, len(data_set)))
 
+
+    if not is_any_data_analyzed:
+        messages.warning(request, message="Cannot found power-prob value to visualise.")
+        return HttpResponseRedirect("/")
 
     return HttpResponseRedirect("/")
