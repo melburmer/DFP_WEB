@@ -461,6 +461,7 @@ def route_selected_testset_subset(request, caller_id, test_set_pk):
 
     if caller_id == 3:
         # redirect selected data to the visualize spectrogram
+        return redirect("analyze:visualize_spectrogram", test_set_pk=test_set_pk)
 
 def visualize_power_prob(request, test_set_pk):
 
@@ -647,3 +648,8 @@ def visualize_power_prob(request, test_set_pk):
         return HttpResponseRedirect("/")
 
     return HttpResponseRedirect("/")
+
+
+
+def visualize_spectrogram(request, test_set_pk):
+    pass
