@@ -19,6 +19,7 @@ from analyze.dpu import Dpu
 from utils import params, file_io, das_util
 # Create your views here.
 from django.views.generic import CreateView, ListView, TemplateView
+from scipy import signal
 
 
 class CreateTestset(SuccessMessageMixin, CreateView):
@@ -652,4 +653,89 @@ def visualize_power_prob(request, test_set_pk):
 
 
 def visualize_spectrogram(request, test_set_pk):
-    pass
+
+    # get selected data's hashes
+    selected_data_hash_list = request.session['selected_data_hash_list']
+    if not selected_data_hash_list: # if user do not select any data
+        messages.warning(request, message="Please select data")
+        return HttpResponseRedirect('/')
+
+    # read vis start and vis and channels
+    vis_start_channels = request.session['start_channels']
+    vis_end_channels = request.session['end_channels']
+
+    # get test set
+    test_set = models.Testset.objects.get(pk=test_set_pk).__dict__
+    # get data set
+    data_set = test_set["data_set"]
+    results_path = test_set["results_path"]
+    colormap = plt.get_cmap('jet')
+    img_save_path = os.path.join(results_path, "spectrogram_images")
+    file_io.create_folder(img_save_path)
+
+    for data_doc in data_set:
+        if data_doc['bin_file_hash'] in selected_data_hash_list:
+            # read specifications about data.
+            raw_data_path = data_doc["data_full_path"]
+            start_channel = data_doc["start_channel"]
+            end_channel = data_doc["end_channel"]
+            channel_num = data_doc["channel_num"]
+            activity_channel = data_doc["activity_channel"]
+            raw_data_file_name = data_doc["file_name"]
+            sampling_rate = data_doc["sampling_rate"]
+            time_start_idx = 0
+
+            if sampling_rate is None:
+                sampling_rate = 2000
+            else:
+                sampling_rate = 2000
+
+            time_end_idx = 5 * 60 * 60 * sampling_rate # 5 hours
+            # read channels to vis.
+
+            if vis_start_channels[data_doc["bin_file_hash"]] == "" or vis_start_channels[data_doc["bin_file_hash"]].isdigit() == False or int(vis_start_channels[data_doc["bin_file_hash"]])<0:
+                vis_start_ch = data_doc["start_channel"]
+            else:
+                #  if start channel didnt given.
+                vis_start_ch = int(vis_start_channels[data_doc["bin_file_hash"]])
+
+            if vis_end_channels[data_doc["bin_file_hash"]] == "" or vis_end_channels[data_doc["bin_file_hash"]].isdigit() == False or int(vis_end_channels[data_doc["bin_file_hash"]])>5150:
+                vis_end_ch = data_doc["end_channel"]
+            else:
+                #  if end channel didnt given.
+                vis_end_ch = int(vis_end_channels[data_doc["bin_file_hash"]])
+
+            if vis_end_ch < vis_start_ch:
+                # set default start and end channels
+                vis_start_ch = data_doc["start_channel"]
+                vis_end_ch = data_doc["end_channel"]
+
+
+            spec_chs = np.arange(vis_start_ch, vis_end_ch+1)
+            spec_chs_red = spec_chs[np.where(spec_chs < channel_num)]
+
+
+            cur_chunk = das_util.read_raw_data(raw_data_path, spec_chs_red[0], spec_chs_red[-1]+1, time_start_idx,
+                                               time_end_idx, channel_num)
+
+
+            for cur_spec_idx, cur_spec_ch in enumerate(spec_chs_red):
+                cur_ch_in_chunk = cur_spec_ch - spec_chs_red[0]
+                cur_ch_data = cur_chunk[::, cur_ch_in_chunk]
+                f, t, Sxx = signal.spectrogram(cur_ch_data, fs=sampling_rate, noverlap=80, nfft=400)
+                Sxx_log = 10 * np.log10(Sxx + 1e-6)
+                plt.figure()
+                plt.pcolormesh(t, f, Sxx_log, cmap=colormap, shading='auto')
+                plt.colorbar()
+                plt.ylabel('Frequency [Hz]')
+                plt.xlabel('Time [sec]')
+                plt.title('Spectrogram ch: ' + str(cur_spec_ch+start_channel))
+                path_to_save = os.path.join(img_save_path, raw_data_file_name+f"_ch{cur_spec_ch+start_channel}_spec.png")
+                plt.savefig(path_to_save)
+                print('cur data ch: {}, {}/{}'.format(cur_spec_ch, cur_spec_idx + 1, len(spec_chs_red)))
+            plt.show()
+
+            print('cur data file name: ' + raw_data_file_name)
+            print('-'*50)
+
+    return HttpResponseRedirect("/")
