@@ -17,5 +17,6 @@ urlpatterns = [
     path('select_test_data_subset/<int:caller_id>/<int:pk>', views.select_test_data_subset, name='select_test_data_subset'),
     path('visualize_power_prob/<int:test_set_pk>', views.visualize_power_prob, name='visualize_power_prob'),
     path('visualize_spectrogram/<int:test_set_pk>', views.visualize_spectrogram, name='visualize_spectrogram'),
+    url(r'^visualise_rawdata/(?P<pk>\d+)$', views.visualise_rawdata, name='visualise_rawdata'),
 
 ]

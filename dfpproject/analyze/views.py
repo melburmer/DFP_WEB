@@ -739,3 +739,40 @@ def visualize_spectrogram(request, test_set_pk):
             print('-'*50)
 
     return HttpResponseRedirect("/")
+
+
+def visualise_rawdata(request, pk):
+    if request.method == "POST":
+        channel_to_vis = int(request.POST.get("ChannelToVis")) #get channel to visualise
+        # get raw data path
+        data_doc = models.Records.objects.get(pk=pk).__dict__
+        raw_data_path = data_doc['data_full_path']
+        channel_num = data_doc['channel_num']
+        sampling_rate = data_doc['sampling_rate']
+        raw_data = das_util.read_raw_data(file_path=raw_data_path, channel_end=channel_num, channel_num=channel_num)
+
+        data_to_vis = raw_data[channel_to_vis]
+
+        # Plot the signal
+        plt.subplot(211)
+        plt.plot(data_to_vis)
+        plt.xlabel('Sample')
+        plt.ylabel('Amplitude')
+
+
+        plt.subplot(212)
+        f, t, Sxx = signal.spectrogram(data_to_vis, fs=sampling_rate, noverlap=80, nfft=400)
+        Sxx_log = 10 * np.log10(Sxx + 1e-6)
+        colormap = plt.get_cmap('jet')
+        plt.pcolormesh(t, f, Sxx_log, cmap=colormap, shading='auto')
+        plt.colorbar()
+        plt.ylabel('Frequency [Hz]')
+        plt.xlabel('Time [sec]')
+        plt.title('Spectrogram ch: ' + str(channel_to_vis))
+        plt.tight_layout()
+        plt.show()
+
+        return HttpResponseRedirect(f'{pk}')
+
+    else:
+        return render(request, 'analyze/ask_channel_number.html', {'pk':pk})

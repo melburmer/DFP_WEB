@@ -121,6 +121,7 @@
         <div class="container">
           <a href="{% url 'database:update' pk=record_detail.pk %}" class="btn btn-warning btn-lg">Update</a>
           <a href="{% url 'database:delete' pk=record_detail.pk %}" class="btn btn-danger btn-lg">Delete</a>
+          <a href="{% url 'analyze:visualise_rawdata' pk=record_detail.pk %}" class="btn btn-success btn-lg">Visualize Raw Data</a>
           <a href="{% url 'database:filter' %}" class="btn btn-primary btn-lg">Back</a>
 
         </div>

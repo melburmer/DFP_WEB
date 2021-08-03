@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<br>
+<form  method="POST" action="{% url 'analyze:visualise_rawdata' pk=pk %}">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="ChannelInput" class="form-label">Channel</label>
+    <input type="number" class="form-control" id="ChannelInput" name="ChannelToVis" aria-describedby="InputHelp">
+    <div id="InputHelp" class="form-text">Please enter a channel to visualise</div>
+  </div>
+  <input type="submit" value="Submit" class="btn btn-success btn-lg">
+</form>
+{% endblock %}
