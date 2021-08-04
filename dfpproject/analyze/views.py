@@ -20,6 +20,7 @@ from utils import params, file_io, das_util
 # Create your views here.
 from django.views.generic import CreateView, ListView, TemplateView
 from scipy import signal
+from plotly.subplots import make_subplots
 
 
 class CreateTestset(SuccessMessageMixin, CreateView):
@@ -743,49 +744,57 @@ def visualize_spectrogram(request, test_set_pk):
 
 def visualise_rawdata(request, pk):
     if request.method == "POST":
-        channel_to_vis = int(request.POST.get("ChannelToVis")) #get channel to visualise
+        try:
+            channel_to_vis = int(request.POST.get("ChannelToVis")) #get channel to visualise
+        except ValueError:
+            # if input is not an integer
+            return HttpResponseRedirect(f'{pk}') # return back to the same page with same pk
         # get raw data path
         data_doc = models.Records.objects.get(pk=pk).__dict__
+        file_name = data_doc['file_name']
         raw_data_path = data_doc['data_full_path']
         channel_num = data_doc['channel_num']
+        start_channel = data_doc["start_channel"]
+        end_channel = data_doc["end_channel"]
         sampling_rate = data_doc['sampling_rate']
+        if channel_to_vis > end_channel or channel_to_vis < start_channel:
+            return HttpResponseRedirect(f'{pk}') # return back to the same page with same pk
+        if sampling_rate is None:
+            sampling_rate = 2000
         raw_data = das_util.read_raw_data(file_path=raw_data_path, channel_end=channel_num, channel_num=channel_num)
 
-        data_to_vis = raw_data[channel_to_vis]
+        data_to_vis = raw_data[::, channel_to_vis]
 
-        # Plot the signal
-        #fig = go.Figure()
-        #fig.add_trace(go.Scatter(x=np.arange(len(data_to_vis)), y=data_to_vis,
-        #                    mode='lines',
-        #                    name='lines'))
-        #fig.update_layout(title='Raw Data',
-        #           xaxis_title='Sample',
-        #           yaxis_title='Amplitude')
-        #fig.show()
+        # plot the signal and the specrogram
+        fig = make_subplots(rows=1, cols=2, subplot_titles=("Raw Data", "Spectrogram for Ch: "+str(channel_to_vis)))
+        # add trace for signal plot
+        fig.add_trace(go.Scatter(x=np.arange(len(data_to_vis)), y=data_to_vis,
+                                mode='lines', name='lines'), row=1, col=1)
+        # add axes titles
+        fig.update_xaxes(title_text="Time Sample", row=1, col=1)
+        fig.update_yaxes(title_text="Amplitude", row=1, col=1)
 
-        #fig = go.Figure()
-
-        # plot spectrogram
-
+        # add trace for the spectrogram
         f, t, Sxx = signal.spectrogram(data_to_vis, fs=sampling_rate, noverlap=80, nfft=400)
+
         Sxx_log = 10 * np.log10(Sxx + 1e-6)
+        fig.add_trace(go.Heatmap(x = t, y = f, z = Sxx_log, colorscale ='Jet'), row=1, col=2)
+        fig.update_xaxes(title_text="Time Sample", row=1, col=1)
+        fig.update_yaxes(title_text="Amplitude", row=1, col=1)
 
-        trace = [go.Heatmap(x = t, y = f,
-                            z = Sxx_log,
-                            colorscale ='Jet')]
-        layout = go.Layout(
-            title = 'Spectrogram for channel: {0}'.format(channel_to_vis),
-            yaxis = dict(title = 'Frequency'), # x-axis label
-            xaxis = dict(title = 'Time'), # y-axis label
-            )
-        fig = go.Figure(data=trace, layout=layout)
+        # add axes titles
+        fig.update_xaxes(title_text="Time", row=1, col=2)
+        fig.update_yaxes(title_text="Frequency", row=1, col=2)
+        # update figure
+        fig.update_layout(height=700, width=1000, title_text="Plots for Ch: "+str(channel_to_vis))
 
-        graph = fig.to_html(full_html=False, default_height=500, default_width=800)
-        return render(request, 'analyze/ask_channel_number.html', {'graph': graph, 'pk':pk})
-
-
-
-        #return HttpResponseRedirect(f'{pk}') # return back to the same page with same pk
+        # plotly graph to html
+        graph = fig.to_html(full_html=False, default_height=700, default_width=1000)
+        return render(request, 'analyze/ask_channel_number.html', {'graph': graph, 'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})
 
     else:
-        return render(request, 'analyze/ask_channel_number.html', {'pk':pk})
+        data_doc = models.Records.objects.get(pk=pk).__dict__
+        file_name = data_doc['file_name']
+        start_channel = data_doc["start_channel"]
+        end_channel = data_doc["end_channel"]
+        return render(request, 'analyze/ask_channel_number.html', {'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})

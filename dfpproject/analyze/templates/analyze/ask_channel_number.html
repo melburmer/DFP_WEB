@@ -7,9 +7,10 @@
   {% csrf_token %}
 
   <div class="mb-3">
-    <label for="ChannelInput" class="form-label">Channel to visualise</label>
+    <h4>Data Name: {{f_name}}</h4>
+    <label for="ChannelInput" class="form-label">Channel to visualise:</label>
     <input type="number" class="form-control" id="ChannelInput" name="ChannelToVis" aria-describedby="InputHelp">
-    <div id="InputHelp" class="form-text">Please enter a channel to visualise</div>
+    <div id="InputHelp" class="form-text">Input channel must be between {{start_ch}}-{{end_ch}}</div>
   </div>
   <input type="submit" value="Submit" class="btn btn-success btn-lg">
 </form>
