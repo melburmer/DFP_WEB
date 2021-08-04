@@ -12,7 +12,7 @@ from decorators.decorators import timer
 from scipy import ndimage
 import os
 import matplotlib.pyplot as plt
-import plotly.express as px
+import plotly.graph_objects as go
 import numpy as np
 import shutil
 from analyze.dpu import Dpu
@@ -754,25 +754,38 @@ def visualise_rawdata(request, pk):
         data_to_vis = raw_data[channel_to_vis]
 
         # Plot the signal
-        plt.subplot(211)
-        plt.plot(data_to_vis)
-        plt.xlabel('Sample')
-        plt.ylabel('Amplitude')
+        #fig = go.Figure()
+        #fig.add_trace(go.Scatter(x=np.arange(len(data_to_vis)), y=data_to_vis,
+        #                    mode='lines',
+        #                    name='lines'))
+        #fig.update_layout(title='Raw Data',
+        #           xaxis_title='Sample',
+        #           yaxis_title='Amplitude')
+        #fig.show()
 
+        #fig = go.Figure()
 
-        plt.subplot(212)
+        # plot spectrogram
+
         f, t, Sxx = signal.spectrogram(data_to_vis, fs=sampling_rate, noverlap=80, nfft=400)
         Sxx_log = 10 * np.log10(Sxx + 1e-6)
-        colormap = plt.get_cmap('jet')
-        plt.pcolormesh(t, f, Sxx_log, cmap=colormap, shading='auto')
-        plt.colorbar()
-        plt.ylabel('Frequency [Hz]')
-        plt.xlabel('Time [sec]')
-        plt.title('Spectrogram ch: ' + str(channel_to_vis))
-        plt.tight_layout()
-        plt.show()
 
-        return HttpResponseRedirect(f'{pk}')
+        trace = [go.Heatmap(x = t, y = f,
+                            z = Sxx_log,
+                            colorscale ='Jet')]
+        layout = go.Layout(
+            title = 'Spectrogram for channel: {0}'.format(channel_to_vis),
+            yaxis = dict(title = 'Frequency'), # x-axis label
+            xaxis = dict(title = 'Time'), # y-axis label
+            )
+        fig = go.Figure(data=trace, layout=layout)
+
+        graph = fig.to_html(full_html=False, default_height=500, default_width=800)
+        return render(request, 'analyze/ask_channel_number.html', {'graph': graph, 'pk':pk})
+
+
+
+        #return HttpResponseRedirect(f'{pk}') # return back to the same page with same pk
 
     else:
         return render(request, 'analyze/ask_channel_number.html', {'pk':pk})

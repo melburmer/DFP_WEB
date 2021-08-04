@@ -181,7 +181,7 @@ class InsertRecord(SuccessMessageMixin, CreateView):
             # move info file into file hierarchy
             shutil.move(src=source_info_file_path, dst=os.path.join(destination_file_path, destination_file_name+".info"))
         else:
-            messages.error(self.request, message="A file found that contain same full_path with the destination path: " + destination_full_path)
+            messages.error(self.request, message="A file found that contain same full_path with the destination path: " + str(destination_full_path))
             return HttpResponseRedirect('/') # return back to home page with error
 
         """ ___save record___ """
