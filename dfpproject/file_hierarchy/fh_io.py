@@ -7,26 +7,6 @@ file_hierarchy_json_path = r"C:\Users\aselsan\Desktop\Dataflow_Pipeline\json\fil
 dynamic_doc_values_json_path = r"json\dynamic_document_values.json"
 
 
-def update_dynamic_document_values(new_file_hierarchy_json_path):
-    f_hierarchy = file_io.read_json(new_file_hierarchy_json_path)
-    f_hierarchy_keys = f_hierarchy.keys()
-    dynamic_document_values_dict = file_io.read_json(dynamic_doc_values_json_path)
-    dynamic_document_values_dict_keys = dynamic_document_values_dict.keys()
-    for key in f_hierarchy_keys:
-        if key in dynamic_document_values_dict_keys:
-            if type(f_hierarchy[key]) is list:
-                if type(dynamic_document_values_dict[key]) is list:
-                    for v in f_hierarchy[key]:
-                        if v not in dynamic_document_values_dict[key]:
-                            dynamic_document_values_dict[key].append(v)
-
-    # update activity type in dynamic_document_values
-    fo_use_case = f_hierarchy["fo_use_case"]
-    activity_type = f_hierarchy["activity_type"]
-    new_key = f"activity_type_{fo_use_case}"
-    dynamic_document_values_dict[new_key] = activity_type
-
-    file_io.save_to_json(dynamic_document_values_dict, dynamic_doc_values_json_path)
 
 
 def create_new_fo_use_case_file(json_path):
@@ -221,10 +201,3 @@ def insert_new_activity_type(fo_use_case, new_activity_type):
             print("New activity_type is successfully added to the file hierarchy")
         except Exception as e:
             print(e)
-
-
-
-
-
-
-
