@@ -9,7 +9,6 @@ $("#ProjectField").change(function () {
       'project': project       // add the project to the GET parameters
     },
     success: function (data) {   // `data` is the return of the `load_regions` view function
-      $('#RegionField').prop('disabled', false);
       $("#RegionField").html(data);  // replace the contents of the regions input with the data that came from the server
     }
   });
@@ -28,7 +27,6 @@ $("#UsecaseField").change(function () {
       'fo_use_case': fo_use_case       // add the fo_use_case to the GET parameters
     },
     success: function (data) {
-      $('#ActField').prop('disabled', false);
       $("#ActField").html(data);
     }
   });
@@ -50,7 +48,6 @@ $("#ActField").change(function () {
       'activity': activity       // add the act to the GET parameters
     },
     success: function (data) {
-      $('#ActSpeField').prop('disabled', false);
       $("#ActSpeField").html(data);
     }
   });

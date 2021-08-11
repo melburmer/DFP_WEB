@@ -646,7 +646,7 @@ def visualize_power_prob(request, test_set_pk):
 
 
     if not is_any_data_analyzed:
-        messages.warning(request, message="Cannot found power-prob value to visualise.")
+        messages.warning(request, message="Cannot find power-prob value to visualise.")
         return HttpResponseRedirect("/")
 
     return HttpResponseRedirect("/")
@@ -790,11 +790,11 @@ def visualise_rawdata(request, pk):
 
         # plotly graph to html
         graph = fig.to_html(full_html=False, default_height=700, default_width=1000)
-        return render(request, 'analyze/ask_channel_number.html', {'graph': graph, 'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})
+        return render(request, 'analyze/vis_raw_data.html', {'graph': graph, 'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})
 
     else:
         data_doc = models.Records.objects.get(pk=pk).__dict__
         file_name = data_doc['file_name']
         start_channel = data_doc["start_channel"]
         end_channel = data_doc["end_channel"]
-        return render(request, 'analyze/ask_channel_number.html', {'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})
+        return render(request, 'analyze/vis_raw_data.html', {'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})

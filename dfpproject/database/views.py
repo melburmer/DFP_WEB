@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView, ListView
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import ValidationError
 from . import forms
 from utils.file_io import read_json
 from utils import params, das_util, file_io
@@ -316,9 +317,14 @@ class UpdateRecord(SuccessMessageMixin, UpdateView):
         destination_full_path = destination_file_path / destination_file_name
 
         if not source_bin_file_path == destination_full_path:
-            shutil.move(src=source_bin_file_path, dst=destination_full_path)
-            # move info file into file hierarchy
-            shutil.move(src=source_info_file_path, dst=os.path.join(destination_file_path, destination_file_name+".info"))
+            try:
+                shutil.move(src=source_bin_file_path, dst=destination_full_path)
+                # move info file into file hierarchy
+                shutil.move(src=source_info_file_path, dst=os.path.join(destination_file_path, destination_file_name+".info"))
+            except FileNotFoundError as e:
+                messages.error(self.request, message=e)
+                return HttpResponseRedirect('/')
+
         return super().form_valid(form)
 
 
