@@ -38,11 +38,13 @@
                 Database Operations
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="{% url 'database:insert' %}">Insert Data</a></li>
+                <li><a class="dropdown-item" href="{% url 'database:insert' %}">Insert One Record</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'database:filter' %}">Filter Data</a></li>
+                <li><a class="dropdown-item" href="{% url 'database:insert_many' %}">Insert Many Record</a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{% url 'database:select_subset_filter' %}">Delete Data</a></li>
+                <li><a class="dropdown-item" href="{% url 'database:filter' %}">Filter Records</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'database:select_subset_filter' %}">Delete Records</a></li>
               </ul>
             </li>
 

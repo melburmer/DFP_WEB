@@ -5,6 +5,7 @@ app_name = 'database'
 
 urlpatterns = [
     url(r'insert/$', views.InsertRecord.as_view(), name='insert'),
+    url(r'insert_many/$', views.InsertManyRecord.as_view(), name='insert_many'),
     url('ajax/load_regions/', views.load_regions, name='ajax_load_regions'),
     url('ajax/load_acts/', views.load_act_types, name='ajax_load_acts'),
     url('ajax/load_actspecs/', views.load_actspecs, name='ajax_load_actspecs'),

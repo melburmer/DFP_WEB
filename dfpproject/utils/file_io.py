@@ -145,10 +145,18 @@ def replace_value_in_json(json_path, key, new_val, old_val="unknown"):
 
 
 
-def ask_file_path(extension):
+def ask_file_path(extension, msg=""):
     root = Tk()
     root.wm_attributes('-topmost', 1)
     root.withdraw()
+    title = f"Please select {extension} file" + msg
     source_file_path = filedialog.askopenfilename(parent=root,
-    title=f"Please select {extension} file", filetype=[(f"{extension} files", f"*.{extension}")])
+    title=title, filetype=[(f"{extension} files", f"*.{extension}")])
     return source_file_path
+
+def ask_directory():
+    root = Tk()
+    root.wm_attributes('-topmost', 1)
+    root.withdraw()
+    directory = filedialog.askdirectory(parent=root)
+    return directory
