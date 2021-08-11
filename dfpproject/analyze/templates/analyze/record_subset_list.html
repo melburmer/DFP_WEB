@@ -7,7 +7,7 @@
     <h1><strong>Please select records from table</strong></h1>
     <button type="button" name="button" class="btn btn-primary btn-lg" id="SelectAllButton">Select all</button>
     <button type="button" name="button" class="btn btn-secondary btn-lg" id="UncheckButton">Uncheck</button>
-    <form class="" action="{% url 'analyze:create_testset' %}" method="GET">
+    <form  action="{% url 'analyze:create_testset' %}" method="GET">
 
       {% csrf_token %}
       <table class="table table-stripe table-hover">

@@ -3,9 +3,8 @@ from utils import params
 import json
 import os
 
-file_hierarchy_json_path = r"C:\Users\aselsan\Desktop\Dataflow_Pipeline\json\file_hierarchy"
-dynamic_doc_values_json_path = r"json\dynamic_document_values.json"
-
+file_hierarchy_json_path = params.file_hierarchy_json_path
+dynamic_doc_values_json_path = params.dynamic_doc_values_path
 
 
 
@@ -39,7 +38,7 @@ def insert_new_midas_version(new_midas_version):
     """update file hierarchy json files."""
     file_hierarchy_json_names = os.listdir(file_hierarchy_json_path)
     for json_name in file_hierarchy_json_names:
-        json_path = os.path.join(file_hierarchy_json_path, json_name)
+        json_path = file_hierarchy_json_path / json_name
         json_content = file_io.read_json(json_path)
         if new_midas_version not in json_content['midas_version']:
             json_content['midas_version'].append(new_midas_version)
@@ -77,7 +76,7 @@ def insert_new_project(fo_use_case, new_project, new_regions: list):
         if json_name == "special_data.json" or json_name == "earthquake.json":
             continue
 
-        json_path = os.path.join(file_hierarchy_json_path, json_name)
+        json_path = file_hierarchy_json_path / json_name
         json_content = file_io.read_json(json_path)
         if fo_use_case == "add project to the all fo_use_cases":
             is_changed = True
@@ -119,7 +118,7 @@ def insert_new_region(new_region_project, new_region):
     # update file_hierarchy
     is_changed = False
     for json_name in os.listdir(file_hierarchy_json_path):
-        json_path = os.path.join(file_hierarchy_json_path, json_name)
+        json_path = file_hierarchy_json_path / json_name
         json_content = file_io.read_json(json_path)
         if key in json_content.keys():
             is_changed = True
@@ -150,7 +149,7 @@ def insert_new_record_type(new_record_type):
     is_changed = False
     json_names = os.listdir(file_hierarchy_json_path)
     for json_name in json_names:
-        json_path = os.path.join(file_hierarchy_json_path, json_name)
+        json_path = file_hierarchy_json_path / json_name
         json_content = file_io.read_json(json_path)
 
         if "record_type" in json_content.keys():
@@ -186,7 +185,7 @@ def insert_new_activity_type(fo_use_case, new_activity_type):
     for json_name in json_names:
         if "special" in json_name:
             continue
-        json_path = os.path.join(file_hierarchy_json_path, json_name)
+        json_path = file_hierarchy_json_path / json_name
         json_content = file_io.read_json(json_path)
         if fo_use_case == json_content["fo_use_case"][0]:
             json_content["activity_type"].append(new_activity_type)

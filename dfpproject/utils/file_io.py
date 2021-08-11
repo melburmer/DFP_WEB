@@ -4,6 +4,9 @@ from datetime import datetime
 import numpy
 import subprocess
 from tkinter import Tk, filedialog
+from utils import params
+
+dynamic_doc_values_json_path = params.dynamic_doc_values_path
 
 
 
@@ -163,9 +166,9 @@ def ask_directory():
 
 
 def update_dynamic_document_values(new_file_hierarchy_json_path):
-    f_hierarchy = file_io.read_json(new_file_hierarchy_json_path)
+    f_hierarchy = read_json(new_file_hierarchy_json_path)
     f_hierarchy_keys = f_hierarchy.keys()
-    dynamic_document_values_dict = file_io.read_json(dynamic_doc_values_json_path)
+    dynamic_document_values_dict = read_json(dynamic_doc_values_json_path)
     dynamic_document_values_dict_keys = dynamic_document_values_dict.keys()
     for key in f_hierarchy_keys:
         if key in dynamic_document_values_dict_keys:
@@ -181,4 +184,4 @@ def update_dynamic_document_values(new_file_hierarchy_json_path):
     new_key = f"activity_type_{fo_use_case}"
     dynamic_document_values_dict[new_key] = activity_type
 
-    file_io.save_to_json(dynamic_document_values_dict, dynamic_doc_values_json_path)
+    save_to_json(dynamic_document_values_dict, dynamic_doc_values_json_path)

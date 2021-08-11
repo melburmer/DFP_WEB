@@ -1,5 +1,0 @@
-{
-	"test_set_name": "deneme",
-	"models_to_run": [15],
-	"acts_to_run": ["excavator"]
-}
