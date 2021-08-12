@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+
+{% block content%}
+
+    <br>
+   <form action="{% url 'filesystem:add_region' %}" method="POST">
+       {% csrf_token %}
+       <div class="mb-3">
+         <label for="Selection" class="form-label"> Please select a project to add a region </label>
+          <select class="form-select"  name="ProjectSelection" id="Selection">
+            {% for i in project_to_select%}
+              <option value= {{i}}>{{i}}</option>
+            {% endfor %}
+
+          </select>
+
+
+          <label for="NewRegion" class="form-label"> New Region </label>
+          <input type="text" class="form-control" id="NewRegion" aria-describedby="InputHelp" name="NewRegionInput">
+          <div id="InputHelp" class="form-text">Please enter new region </div>
+
+          <input type="submit" value="Submit" class="btn btn-success btn-lg">
+          <a class="btn btn-warning btn-lg" href="/"}">Back</a>
+
+      </div>
+
+
+   </form>
+{% endblock %}

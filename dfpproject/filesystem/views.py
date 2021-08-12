@@ -113,3 +113,30 @@ class AddProject(TemplateView):
         except Exception as e:
             messages.error(request, message=e)
             return HttpResponseRedirect('/')
+
+
+
+class AddRegion(TemplateView):
+    template_name = "filesystem/add_region.html"
+
+
+    def get(self, request):
+        project_to_select = file_io.read_json(params.dynamic_doc_values_path)["project"]
+        return render(request, self.template_name, {'project_to_select':project_to_select})
+
+    def post(self, request):
+        project = request.POST.get('ProjectSelection')
+        new_region = request.POST.get('NewRegionInput')
+
+        if new_region != '' and type(new_region) is not int:
+            try:
+                new_region = new_region.replace(' ', '')
+                fh_io.insert_new_region(project, new_region)
+                messages.success(request, message="New Region is successfully added to the file system.")
+                return HttpResponseRedirect('/')
+            except Exception as e:
+                messages.error(request, message=e)
+                return HttpResponseRedirect('/')
+        else:
+            messages.warning(request, message="Please enter a region in proper format")
+            return HttpResponseRedirect('/')
