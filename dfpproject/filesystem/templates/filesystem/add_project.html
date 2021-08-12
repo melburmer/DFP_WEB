@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+
+{% block content%}
+
+    <br>
+   <form action="{% url 'filesystem:add_project' %}" method="POST">
+     {% csrf_token %}
+     <div class="mb-3">
+       <label for="Selection" class="form-label"> Use case to add a new project </label>
+        <select class="form-select" aria-label="Default select example" name="UseCaseSelection" id="Selection">
+          <option selected>Add new project to the all fo_use_cases </option>
+          {% for i in fo_use_cases_to_select%}
+            <option value= {{i}}>{{i}}</option>
+          {% endfor %}
+
+        </select>
+
+        <label for="NewProject" class="form-label"> New Project Name </label>
+        <input type="text" class="form-control" id="NewProject" name="NewProjectInput">
+
+        <label for="NewProjectRegions" class="form-label"> New Project Regions </label>
+        <input type="text" class="form-control" id="NewProjectRegions" aria-describedby="InputHelp" name="NewProjectRegionsInput">
+        <div id="InputHelp" class="form-text">Please split different regions with comma(',') </div>
+
+        <input type="submit" value="Submit" class="btn btn-success btn-lg">
+        <a class="btn btn-warning btn-lg" href="/"}">Back</a>
+
+    </div>
+
+
+   </form>
+{% endblock %}

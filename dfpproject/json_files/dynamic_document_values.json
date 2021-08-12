@@ -19,6 +19,5 @@
     "record_label": ["true_alarm","false_alarm","menhol"],
     "activity_specification_human": ["walking","tum_saha_yurume","running"],
     "activity_specification_excavator": ["cutter"],
-    "activity_specification_digging": [],
-    "activity_type_['melih']": ["human","digging","excavator","vehicle","raining","long","earthquake","earthquake"]
+    "activity_specification_digging": []
 }

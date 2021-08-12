@@ -70,15 +70,24 @@ def insert_new_midas_version(new_midas_version):
 
 def insert_new_project(fo_use_case, new_project, new_regions: list):
     is_changed = False  # used to track if new project is added or not.
-    file_hierarchy_json_names = os.listdir(file_hierarchy_json_path)
+
+    """update dynamic document values file"""
+    dynamic_json_content = file_io.read_json(dynamic_doc_values_json_path)
+    if new_project not in dynamic_json_content["project"]:
+        dynamic_json_content["project"].append(new_project)
+        dynamic_json_content[f"region_{new_project}"] = new_regions
+    # save back
+    file_io.save_to_json(dynamic_json_content, dynamic_doc_values_json_path)
+
     """add this new project to the file hierarchy jsons"""
+    file_hierarchy_json_names = os.listdir(file_hierarchy_json_path)
     for json_name in file_hierarchy_json_names:
         if json_name == "special_data.json" or json_name == "earthquake.json":
             continue
 
         json_path = file_hierarchy_json_path / json_name
         json_content = file_io.read_json(json_path)
-        if fo_use_case == "add project to the all fo_use_cases":
+        if fo_use_case == "Add new project to the all fo_use_cases":
             is_changed = True
             json_content["project"].append(new_project)
             # create new regions
@@ -100,7 +109,7 @@ def insert_new_project(fo_use_case, new_project, new_regions: list):
             os.system("python create_file_hierarchy.py")
             print("New project is successfully added to the file hierarchy")
         except Exception as e:
-            print(e)
+            raise SystemError("Error while executing create_file_hierarchy.py ")
 
 
 def insert_new_region(new_region_project, new_region):

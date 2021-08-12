@@ -83,3 +83,33 @@ class AddMidasVersion(TemplateView):
         except Exception as e:
             messages.error(request, message=e)
             return HttpResponseRedirect('/')
+
+
+class AddProject(TemplateView):
+    template_name = "filesystem/add_project.html"
+
+    def get(self, request):
+        # read fo use cases, they will used in form.
+
+        fo_use_cases_to_select = file_io.read_json(params.dynamic_doc_values_path)["fo_use_case"]
+
+        return render(request, self.template_name, {'fo_use_cases_to_select':fo_use_cases_to_select})
+
+    def post(self, request):
+        fo_use_case = request.POST.get('UseCaseSelection')
+        new_project = request.POST.get('NewProjectInput')
+        new_regions = request.POST.get('NewProjectRegionsInput')
+
+        # arrange input format
+        if new_regions != '' and new_regions.isdigit() is False:
+            new_regions = new_regions.replace(' ', '')
+            new_regions = new_regions.split(',')
+            new_regions = [i for i in new_regions if i != '']  # if split list is like ['new_region','']
+
+        try:
+            fh_io.insert_new_project(fo_use_case, new_project, new_regions)
+            messages.success(request, message="New Project is Successfully Created")
+            return HttpResponseRedirect('/')
+        except Exception as e:
+            messages.error(request, message=e)
+            return HttpResponseRedirect('/')

@@ -16,5 +16,5 @@
     "territory_hatay": ["bayraktar","halepli","ilker_acar","ufuk","yagmur","zafer_toka","erol_cavus"],
     "territory_igdir": ["bulent_aydin","subasi"],
     "record_type": ["alarm_triggered","on_demand"],
-    "activity_type": ["human","digging","excavator","vehicle","raining","long","earthquake","earthquake"]
+    "activity_type": ["human","digging","excavator","vehicle","raining","long","earthquake"]
 }
