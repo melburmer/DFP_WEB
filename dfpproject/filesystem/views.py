@@ -57,3 +57,29 @@ class AddUseCase(TemplateView):
 
         messages.success(request, message=f"New use case '{name}' is successfully created.")
         return HttpResponseRedirect('/')
+
+
+class AddMidasVersion(TemplateView):
+    template_name = "filesystem/add_midas_version.html"
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        new_midas_version = request.POST.get('NewMidasVersionInput') # get input
+
+        if new_midas_version.isdigit():
+            new_midas_version = "midas"+str(new_midas_version)
+        elif type(new_midas_version) is str:
+            new_midas_version = new_midas_version.lower()
+            if 'mıdas' in new_midas_version:
+                new_midas_version = new_midas_version.replace("mıdas", "midas")
+            new_midas_version = new_midas_version.replace(' ','')
+
+        try:
+            fh_io.insert_new_midas_version(new_midas_version)
+            messages.success(request, message="New Midas Version is Successfully Created")
+            return HttpResponseRedirect('/')
+        except Exception as e:
+            messages.error(request, message=e)
+            return HttpResponseRedirect('/')

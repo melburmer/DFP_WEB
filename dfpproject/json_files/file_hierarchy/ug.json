@@ -8,7 +8,7 @@
     "region_igtas": ["istanbul"],
     "region_proof_of_concept": ["mebs"],
     "region_aselsan": ["macunkoy","golbek"],
-	"region_istanbul": ["istanbul_metrosu"],
+    "region_istanbul": ["istanbul_metrosu"],
     "region_konvensiyonel": ["selcuk","balikesir"],
     "region_yht": ["konya","polatli","sincan"],
     "territory_urdun": ["kaddb"],

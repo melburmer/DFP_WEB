@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{% block content%}
+
+    <br>
+   <form action="{% url 'filesystem:add_midas_version' %}" method="POST">
+     {% csrf_token %}
+     <div class="mb-3">
+        <label for="NewUseCase" class="form-label"> New Midas Version </label>
+        <input type="text" class="form-control" id="NewUseCase" aria-describedby="InputHelp" name="NewMidasVersionInput">
+        <div id="InputHelp" class="form-text">Please enter new midas version</div>
+        <input type="submit" value="Submit" class="btn btn-success btn-lg">
+        <a class="btn btn-warning btn-lg" href="/"}">Back</a>
+
+    </div>
+
+
+   </form>
+{% endblock %}

@@ -5,7 +5,7 @@
     "region_istanbul": ["istanbul_metrosu"],
     "region_konvensiyonel": ["selcuk","balikesir"],
     "region_yht": ["konya","polatli","sincan"],
-	"region_middle_east": ["urdun","suudi_arabistan"],
+    "region_middle_east": ["urdun","suudi_arabistan"],
     "region_kayi": ["hatay","igdir"],
     "region_botas": ["silopi","viransehir","idil","midyat","araban","pazarcik","ceyhan","osmaniye"],
     "region_igtas": ["istanbul"],
