@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+
+{% block content%}
+
+    <br>
+   <form action="{% url 'filesystem:add_act' %}" method="POST">
+       {% csrf_token %}
+       <div class="mb-3">
+         <label for="Selection" class="form-label"> Please select a Fo Use Case to add a new activity </label>
+          <select class="form-select"  name="FoUseCaseSelection" id="Selection">
+            {% for i in use_case_to_select%}
+              <option value= {{i}}>{{i}}</option>
+            {% endfor %}
+
+          </select>
+
+
+          <label for="NewAct" class="form-label"> New Activity </label>
+          <input type="text" class="form-control" id="NewAct" aria-describedby="InputHelp" name="NewActInput">
+          <div id="InputHelp" class="form-text">Please enter a new activity </div>
+
+          <input type="submit" value="Submit" class="btn btn-success btn-lg">
+          <a class="btn btn-warning btn-lg" href="/"}">Back</a>
+
+      </div>
+
+
+   </form>
+{% endblock %}

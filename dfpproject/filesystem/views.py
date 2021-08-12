@@ -163,3 +163,27 @@ class AddRecordType(TemplateView):
         else:
             messages.warning(request, message="Please enter a record_type with proper format")
             return HttpResponseRedirect('/')
+
+class AddAct(TemplateView):
+    template_name = "filesystem/add_act.html"
+
+    def get(self, request):
+        use_case_to_select = file_io.read_json(params.dynamic_doc_values_path)["fo_use_case"]
+        return render(request, self.template_name, {'use_case_to_select':use_case_to_select})
+
+    def post(self, request):
+        fo_use_case = request.POST.get("FoUseCaseSelection")
+        new_act = request.POST.get("NewActInput")
+
+        if new_act != '' and new_act.isdigit() is False:
+            try:
+                new_act = new_act.replace(' ', '')
+                fh_io.insert_new_activity_type(fo_use_case, new_act)
+                messages.success(request, message="New act_type is successfully added to the file system.")
+                return HttpResponseRedirect('/')
+            except Exception as e:
+                messages.error(request, message=e)
+                return HttpResponseRedirect('/')
+        else:
+            messages.warning(request, message="Please enter a act type with proper format")
+            return HttpResponseRedirect('/')
