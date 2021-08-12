@@ -174,7 +174,7 @@ def insert_new_record_type(new_record_type):
             os.system("python create_file_hierarchy.py")
             print("New record_type is successfully added to the file hierarchy")
         except Exception as e:
-            print(e)
+            raise SystemError("Error while executing create_file_hierarchy.py")
 
 
 

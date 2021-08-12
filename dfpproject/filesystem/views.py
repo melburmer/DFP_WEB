@@ -138,5 +138,28 @@ class AddRegion(TemplateView):
                 messages.error(request, message=e)
                 return HttpResponseRedirect('/')
         else:
-            messages.warning(request, message="Please enter a region in proper format")
+            messages.warning(request, message="Please enter a region with proper format")
+            return HttpResponseRedirect('/')
+
+
+class AddRecordType(TemplateView):
+    template_name = "filesystem/add_record_type.html"
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        new_record_type = request.POST.get('NewRecordTypeInput')
+        if new_record_type != '' and new_record_type.isdigit() == False:
+            try:
+                new_record_type = new_record_type.replace(' ', '')
+                fh_io.insert_new_record_type(new_record_type)
+                messages.success(request, message="New record_type is successfully added to the file system.")
+                return HttpResponseRedirect('/')
+            except Exception as e:
+                messages.error(request, message=e)
+                return HttpResponseRedirect('/')
+
+        else:
+            messages.warning(request, message="Please enter a record_type with proper format")
             return HttpResponseRedirect('/')

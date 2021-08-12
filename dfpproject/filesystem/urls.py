@@ -9,4 +9,7 @@ urlpatterns = [
     url(r'add_midas_version/$', views.AddMidasVersion.as_view(), name='add_midas_version'),
     url(r'add_project/$', views.AddProject.as_view(), name='add_project'),
     url(r'add_region/$', views.AddRegion.as_view(), name='add_region'),
+    url(r'add_record_type/$', views.AddRecordType.as_view(), name='add_record_type'),
+
+
 ]

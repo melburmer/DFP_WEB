@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{% block content%}
+
+    <br>
+   <form action="{% url 'filesystem:add_record_type' %}" method="POST">
+     {% csrf_token %}
+     <div class="mb-3">
+        <label for="NewRecordType" class="form-label"> New Record Type </label>
+        <input type="text" class="form-control" id="NewRecordType" aria-describedby="InputHelp" name="NewRecordTypeInput">
+        <div id="InputHelp" class="form-text">Please enter new record type name</div>
+        <input type="submit" value="Submit" class="btn btn-success btn-lg">
+        <a class="btn btn-warning btn-lg" href="/"}">Back</a>
+
+    </div>
+
+
+   </form>
+{% endblock %}
