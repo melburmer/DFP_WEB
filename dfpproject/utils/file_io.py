@@ -179,7 +179,7 @@ def update_dynamic_document_values(new_file_hierarchy_json_path):
                             dynamic_document_values_dict[key].append(v)
 
     # update activity type in dynamic_document_values
-    fo_use_case = f_hierarchy["fo_use_case"]
+    fo_use_case = f_hierarchy["fo_use_case"][0]
     activity_type = f_hierarchy["activity_type"]
     new_key = f"activity_type_{fo_use_case}"
     dynamic_document_values_dict[new_key] = activity_type
