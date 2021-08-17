@@ -17,3 +17,31 @@
   justify-content: center;
 
 }
+
+.StatButton{
+  padding: 12px;
+  text-align: center;
+  font-size: 14;
+  width: 100%;
+  border: 2px solid;
+
+}
+
+.StatButtonDiv{
+   margin:2px;
+   width: 100%;
+}
+
+.ButtonContainer{
+  width: 30%;
+}
+
+.GraphContainer{
+  width: 70%;
+  border-radius: .4rem;
+
+}
+
+.flex-container{
+  display: flex;
+}

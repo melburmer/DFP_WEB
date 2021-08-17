@@ -8,6 +8,29 @@
       {% endfor %}
   {% endif %}
 
-  <h1>Home page</h1>
+
+<div class="jumbotron">
+
+  <div class="flex-container">
+
+
+    <div class="ButtonContainer">
+          {% for i in target_document_keys%}
+              <div class="StatButtonDiv">
+                  <a class="btn btn btn-outline-dark btn-lg StatButton" href="#" role="button"><strong>Show {{i}} statistics</strong></a>
+              </div>
+          {% endfor %}
+    </div>
+
+    <div class="GraphContainer">
+
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
 
 {% endblock %}
