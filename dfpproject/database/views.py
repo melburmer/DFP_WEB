@@ -618,3 +618,27 @@ def load_actspecs(request):
     else:
         actspecs = ""
     return render(request, 'database/actspecs_dropdown_list_options.html', {'actspecs':actspecs})
+
+def export_data(request):
+    data_to_export_pk = request.POST.getlist('data_to_export')
+    # ask destination directory to the user.
+    dest_directory_path = file_io.ask_directory()
+    if dest_directory_path == "": # check if user select a directory.
+        messages.warning(request, message='Please select a destination directory.')
+        return HttpResponseRedirect('/') # return back to home page with warning
+
+    if data_to_export_pk:
+        for pk in data_to_export_pk:
+            raw_data_full_path = models.Records.objects.get(pk=pk).data_full_path # get raw data path
+            info_data_full_path = raw_data_full_path + ".info" # info file path
+            try:
+                # copy data
+                shutil.copy(src=raw_data_full_path, dst=dest_directory_path)
+                shutil.copy(src=info_data_full_path, dst=dest_directory_path)
+            except Exception as e:
+                messages.error(request, message=e)
+                return HttpResponseRedirect('/') # return back to home page with warning
+
+        messages.success(request, message="Filtered data are successfully exported.")
+        return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/')

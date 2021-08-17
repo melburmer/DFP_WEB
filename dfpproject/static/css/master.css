@@ -46,3 +46,11 @@
 .flex-container{
   display: flex;
 }
+
+.FilterFormContainer{
+  width: 20%;
+}
+
+.ExportDataFormContainer{
+  width: 80%;
+}

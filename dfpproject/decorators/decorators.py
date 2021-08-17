@@ -1,6 +1,5 @@
 import time
 import functools
-from utils import file_io
 
 
 def timer(func):

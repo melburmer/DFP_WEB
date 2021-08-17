@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'^select_subset_filter$', views.select_subset_filter, name="select_subset_filter"),
     url(r'^select_subset$', views.RecordSelectSubset.as_view(), name="select_subset"),
     url(r'^delete_many$', views.delete_many, name="delete_selected_data"),
+    url(r'^export_data$', views.export_data, name="export_data"),
 ]
