@@ -46,7 +46,10 @@ def get_num_channel_from_info(info_file_path):
             channel_num = channels[0][1] - start_channel + 1
         except:
             start_channel = 0
-            channel_num = int(info_file['number_of_channels_in_one_sample'])
+            try:
+                channel_num = int(info_file['number_of_channels_in_one_sample'])
+            except  Exception as e:
+                channel_num = int(info_file['number_of_channels_in_record'])
 
     return start_channel, channel_num
 

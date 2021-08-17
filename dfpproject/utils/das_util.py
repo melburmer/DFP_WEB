@@ -4,6 +4,7 @@ import os
 from . import file_io
 from scipy import ndimage
 from utils import params
+import datetime
 
 def read_raw_data(file_path, channel_start=0, channel_end=5150, time_start_idx=0, time_end_idx=60*2000,
                   channel_num=5150, header_bytes=0, chunk_height=2*60*2000):
@@ -230,12 +231,13 @@ def find_counts(prob_data_mapped, norm_power_data, act, act_start, act_end, prin
 
 
 def extract_at_header(at_full_path) -> (dict, dict):
+
     dict_info = {}  # extracted info will be stored here.
 
     at_folder_path = file_io.get_parent_folder(at_full_path)
     at_file_name = file_io.get_file_name(at_full_path)
     version_to_run = 'convert_alarm_triggered.exe'
-    exe_folder_path = params.EXE_FOLDER_PATH
+    exe_folder_path = str(params.EXE_FOLDER_PATH)
     command_to_run = 'cd ' + exe_folder_path + ' & ' + version_to_run + ' '
     command_to_run += at_full_path + ' ' + at_folder_path + "\\"
     err = os.system(command_to_run)

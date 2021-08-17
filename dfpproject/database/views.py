@@ -35,7 +35,7 @@ class InsertRecord(SuccessMessageMixin, CreateView):
         source_bin_file_path = file_io.ask_file_path(extension='bin')
 
         if source_bin_file_path == "": # check if user select any bin file.
-            messages.warning(self.request, message='Please select bin file.')
+            messages.warning(self.request, message='Please select a bin file.')
             return HttpResponseRedirect('/') # return back to home page with warning
 
 
@@ -65,7 +65,12 @@ class InsertRecord(SuccessMessageMixin, CreateView):
             # if remove header is true, remove header from alarm triggered file.
             # access remove_header form element with cleaned data because it isn't model field.
             if form.cleaned_data['remove_header']:
-                dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                try:
+                    dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                except Exception as e:
+                    messages.error(self.request, message=f"Error while extracting header. Error: {e}")
+                    return HttpResponseRedirect('/')
+
                 source_info_file_path = source_bin_file_path + '.info'
                 # save info to file
                 file_io.save_to_json(dict_info, source_info_file_path)
@@ -77,7 +82,7 @@ class InsertRecord(SuccessMessageMixin, CreateView):
                 source_info_file_path = file_io.ask_file_path(extension='info')
 
                 if source_info_file_path == "": # check if user select any info file.
-                    messages.warning(self.request, message='Please select info file.')
+                    messages.warning(self.request, message='Please select an info file.')
                     return HttpResponseRedirect('/') # return back to home page with warning
 
         # read start and end channel from info file  and calculate iter_num
@@ -97,8 +102,17 @@ class InsertRecord(SuccessMessageMixin, CreateView):
 
         # read info content
         info_dict = file_io.read_json(source_info_file_path)  # read relevant info file
-        number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_one_sample"])
-        record_notes = info_dict["record_notes"]
+
+        try:
+            if "number_of_channels_in_one_sample" in info_dict.keys():
+                number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_one_sample"])
+            else:
+                number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_record"]) # this param. naming is different in midas3 info file.
+
+            record_notes = info_dict["record_notes"]
+        except KeyError as e: # catch key error
+            messages.error(self.request, message=f"Key error while reading info file. Error: {e}")
+            return HttpResponseRedirect('/') # return back to home page with error
         # get file size
         record_size = os.path.getsize(source_bin_file_path)  # returns byte
         # get iteration number from size of bin file.
@@ -129,26 +143,38 @@ class InsertRecord(SuccessMessageMixin, CreateView):
             pass
 
         # create hash for selected bin and info file
-        self.object.info_file_hash = hash_file(source_info_file_path)
-        self.object.bin_file_hash = hash_file(source_bin_file_path)
+        try:
+            self.object.info_file_hash = hash_file(source_info_file_path)
+            self.object.bin_file_hash = hash_file(source_bin_file_path)
+        except  Exception as e:
+            message.error(self.request, message=f"Error while hashing. Error: {e}")
+            return HttpResponseRedirect('/')
 
         # extract date from selected bin file
         # if record date key is exist in the relevant info file
         if "record_date_time" in info_dict.keys():
-            record_date_str = info_dict["record_date_time"]
-            date = record_date_str.split("--")[0]
-            time = record_date_str.split("--")[1]
-            year, month, day = list(map(lambda x: int(x), date.split("-")))  # extracts year/month/day from date string to create datetime object
-            hour, minute, second = list(map(lambda x: int(x), time.split("-")))  # extracts hour, minute, second
-            record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+            try:
+                record_date_str = info_dict["record_date_time"]
+                date = record_date_str.split("--")[0]
+                time = record_date_str.split("--")[1]
+                year, month, day = list(map(lambda x: int(x), date.split("-")))  # extracts year/month/day from date string to create datetime object
+                hour, minute, second = list(map(lambda x: int(x), time.split("-")))  # extracts hour, minute, second
+                record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+            except Exception as e:
+                message.error(self.request, message=f"Error while extracting the date. Error: {e}")
+                return HttpResponseRedirect('/')
 
         else: # split by a special convention for bin file to get the record date
-            record_date = source_bin_file_path.split("--")
-            # record_date[1] -> year/month/day , record_date[2]-> hour/minute/second
-            record_date_str = record_date[1] + "--" + record_date[2].split(".")[0]  # extract record date part
-            year, month, day = list(map(lambda x: int(x), record_date[1].split("-")))  # extracts year/month/day from date string to create datetime object
-            hour, minute, second = list(map(lambda x: int(x), record_date[2].split(".")[0].split("-")))  # extracts hour, minute, second
-            record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+            try:
+                record_date = source_bin_file_path.split("--")
+                # record_date[1] -> year/month/day , record_date[2]-> hour/minute/second
+                record_date_str = record_date[1] + "--" + record_date[2].split(".")[0]  # extract record date part
+                year, month, day = list(map(lambda x: int(x), record_date[1].split("-")))  # extracts year/month/day from date string to create datetime object
+                hour, minute, second = list(map(lambda x: int(x), record_date[2].split(".")[0].split("-")))  # extracts hour, minute, second
+                record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+            except Exception as e:
+                message.error(self.request, message=f"Error while extracting the date. Error: {e}")
+                return HttpResponseRedirect('/')
 
         self.object.time_of_day = das_util.find_time_of_day(hour)
         self.object.record_date = record_date_timestamp
@@ -243,7 +269,11 @@ class InsertManyRecord(SuccessMessageMixin, CreateView):
                 # if remove header is true, remove header from alarm triggered file.
                 # access remove_header form element with cleaned data because it isn't model field.
                 if form.cleaned_data['remove_header']:
-                    dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                    try:
+                        dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                    except Exception as e:
+                        messages.error(self.request, message=f"Error while extracting header. Error: {e}")
+                        return HttpResponseRedirect('/')
                     source_info_file_path = source_bin_file_path + '.info'
                     # save info to file
                     file_io.save_to_json(dict_info, source_info_file_path)
@@ -275,8 +305,15 @@ class InsertManyRecord(SuccessMessageMixin, CreateView):
 
             # read info content
             info_dict = file_io.read_json(source_info_file_path)  # read relevant info file
-            number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_one_sample"])
-            record_notes = info_dict["record_notes"]
+            try:
+                if "number_of_channels_in_one_sample" in info_dict.keys():
+                    number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_one_sample"])
+                else:
+                    number_of_channels_in_one_sample = int(info_dict["number_of_channels_in_record"]) # this param. naming is different in midas3 info file.
+                record_notes = info_dict["record_notes"]
+            except KeyError as e:
+                messages.error(self.request, message=f"Key error while reading info file. Error: {e}")
+                return HttpResponseRedirect('/') # return back to home page with error
             # get file size
             record_size = os.path.getsize(source_bin_file_path)  # returns byte
             # get iteration number from size of bin file.
@@ -307,26 +344,38 @@ class InsertManyRecord(SuccessMessageMixin, CreateView):
                 pass
 
             # create hash for selected bin and info file
-            self.object.info_file_hash = hash_file(source_info_file_path)
-            self.object.bin_file_hash = hash_file(source_bin_file_path)
+            try:
+                self.object.info_file_hash = hash_file(source_info_file_path)
+                self.object.bin_file_hash = hash_file(source_bin_file_path)
+            except  Exception as e:
+                message.error(self.request, message=f"Error while hashing. Error: {e}")
+                return HttpResponseRedirect('/')
 
             # extract date from selected bin file
             # if record date key is exist in the relevant info file
             if "record_date_time" in info_dict.keys():
-                record_date_str = info_dict["record_date_time"]
-                date = record_date_str.split("--")[0]
-                time = record_date_str.split("--")[1]
-                year, month, day = list(map(lambda x: int(x), date.split("-")))  # extracts year/month/day from date string to create datetime object
-                hour, minute, second = list(map(lambda x: int(x), time.split("-")))  # extracts hour, minute, second
-                record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+                try:
+                    record_date_str = info_dict["record_date_time"]
+                    date = record_date_str.split("--")[0]
+                    time = record_date_str.split("--")[1]
+                    year, month, day = list(map(lambda x: int(x), date.split("-")))  # extracts year/month/day from date string to create datetime object
+                    hour, minute, second = list(map(lambda x: int(x), time.split("-")))  # extracts hour, minute, second
+                    record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+                except Exception as e:
+                    message.error(self.request, message=f"Error while extracting the date. Error: {e}")
+                    return HttpResponseRedirect('/')
 
             else: # split by a special convention for bin file to get the record date
-                record_date = source_bin_file_path.split("--")
-                # record_date[1] -> year/month/day , record_date[2]-> hour/minute/second
-                record_date_str = record_date[1] + "--" + record_date[2].split(".")[0]  # extract record date part
-                year, month, day = list(map(lambda x: int(x), record_date[1].split("-")))  # extracts year/month/day from date string to create datetime object
-                hour, minute, second = list(map(lambda x: int(x), record_date[2].split(".")[0].split("-")))  # extracts hour, minute, second
-                record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+                try:
+                    record_date = source_bin_file_path.split("--")
+                    # record_date[1] -> year/month/day , record_date[2]-> hour/minute/second
+                    record_date_str = record_date[1] + "--" + record_date[2].split(".")[0]  # extract record date part
+                    year, month, day = list(map(lambda x: int(x), record_date[1].split("-")))  # extracts year/month/day from date string to create datetime object
+                    hour, minute, second = list(map(lambda x: int(x), record_date[2].split(".")[0].split("-")))  # extracts hour, minute, second
+                    record_date_timestamp = datetime.datetime(year, month, day, hour, minute, second)
+                except Exception as e:
+                    message.error(self.request, message=f"Error while extracting the date. Error: {e}")
+                    return HttpResponseRedirect('/')
 
             self.object.time_of_day = das_util.find_time_of_day(hour)
             self.object.record_date = record_date_timestamp
@@ -402,7 +451,11 @@ class UpdateRecord(SuccessMessageMixin, UpdateView):
 
         if self.object.record_type == "alarm_triggered":
             if form.cleaned_data['remove_header']:
-                dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                try:
+                    dict_info, dict_header = das_util.extract_at_header(source_bin_file_path)
+                except Exception as e:
+                    messages.error(self.request, message=f"Error while extracting header. Error: {e}")
+                    return HttpResponseRedirect('/')
                 # save info to file
                 file_io.save_to_json(dict_info, source_info_file_path)
                 # set header
