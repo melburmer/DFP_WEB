@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'^database/', include('database.urls', namespace='database')),
     url(r'^analyze/', include('analyze.urls', namespace='analyze')),
     url(r'^filesystem/', include('filesystem.urls', namespace='filesystem')),
+    path('stats/<str:stat_name>', views.RenderStatGraph, name='render_stat_graph'),
 ]
