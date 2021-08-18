@@ -13,15 +13,15 @@ import datetime
 # abstract model to store alarm triggered filed header in record model as embedded field
 
 class Atheader(models.Model):
-    message_type = models.IntegerField()
-    unit_id = models.IntegerField()
-    sensor_id = models.IntegerField()
-    start_channel_number = models.IntegerField()
-    end_channel_number = models.IntegerField()
-    sequance_number = models.IntegerField()
-    sampling_rate = models.FloatField()
-    bit_depth = models.IntegerField()
-    array_size = models.IntegerField()
+    message_type = models.IntegerField(blank=True)
+    unit_id = models.IntegerField(blank=True)
+    sensor_id = models.IntegerField(blank=True)
+    start_channel_number = models.IntegerField(blank=True)
+    end_channel_number = models.IntegerField(blank=True)
+    sequence_number = models.IntegerField(blank=True)
+    sampling_rate = models.FloatField(blank=True)
+    bit_depth = models.IntegerField(blank=True)
+    array_size = models.IntegerField(blank=True)
 
     class Meta:
         abstract=True

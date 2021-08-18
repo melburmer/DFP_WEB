@@ -36,6 +36,7 @@
                       <th scope="col">Project</th>
                       <th scope="col">Region</th>
                       <th scope="col">Activity</th>
+                      <th scope="col">Record Type</th>
                       <th scope="col">Activity Channel</th>
                       <th scope="col">Soil Type</th>
                       <th scope="col">Distance to Fo</th>
@@ -49,10 +50,19 @@
                           <th scope="row"><a  href="{% url 'database:detail' pk=obj.pk %}">{{ forloop.counter }}</a></th>
                           <td>{{obj.iter_num}}</td>
                           <td>{{obj.midas_version}}</td>
-                          <td>{{obj.fo_use_case}}</td>
+                          {% if obj.fo_use_case == 'underground'%}
+                            <td>ug</td>
+                          {% else%}
+                            <td>{{obj.fo_use_case}}</td>
+                          {% endif %}
                           <td>{{obj.project}}</td>
                           <td>{{obj.region}}</td>
                           <td>{{obj.activity}}</td>
+                          {% if obj.record_type == 'alarm_triggered'%}
+                            <td>at</td>
+                          {% else%}
+                            <td>{{obj.record_type}}</td>
+                          {% endif %}
                           <td>{{obj.activity_channel}}</td>
                           <td>{{obj.soil_type}}</td>
                           <td>{{obj.distance_to_fo}}</td>

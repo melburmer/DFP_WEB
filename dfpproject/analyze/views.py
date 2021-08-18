@@ -761,9 +761,14 @@ def visualise_rawdata(request, pk):
             return HttpResponseRedirect(f'{pk}') # return back to the same page with same pk
         if sampling_rate is None:
             sampling_rate = 2000
-        raw_data = das_util.read_raw_data(file_path=raw_data_path, channel_end=channel_num, channel_num=channel_num)
+        channel_to_vis_index = channel_to_vis - start_channel # channel number to index
 
-        data_to_vis = raw_data[::, channel_to_vis]
+        try:
+            raw_data = das_util.read_raw_data(file_path=raw_data_path, channel_end=channel_num, channel_num=channel_num)
+            data_to_vis = raw_data[::, channel_to_vis_index]
+        except Exception as e:
+            messages.error(request, message=f"Error while reading data. Error: {e}")
+            return HttpResponseRedirect('/')
 
         # plot the signal and the specrogram
         fig = make_subplots(rows=1, cols=2, subplot_titles=("Raw Data", "Spectrogram for Ch: "+str(channel_to_vis)))
@@ -790,11 +795,12 @@ def visualise_rawdata(request, pk):
 
         # plotly graph to html
         graph = fig.to_html(full_html=False, default_height=700, default_width=1000)
-        return render(request, 'analyze/vis_raw_data.html', {'graph': graph, 'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})
+        return render(request, 'analyze/vis_raw_data.html', {'graph': graph, 'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel, 'channel_num':channel_num})
 
     else:
         data_doc = models.Records.objects.get(pk=pk).__dict__
         file_name = data_doc['file_name']
         start_channel = data_doc["start_channel"]
         end_channel = data_doc["end_channel"]
-        return render(request, 'analyze/vis_raw_data.html', {'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel})
+        channel_num = data_doc["channel_num"]
+        return render(request, 'analyze/vis_raw_data.html', {'pk':pk, 'f_name':file_name, 'start_ch':start_channel, 'end_ch':end_channel, 'channel_num':channel_num})
