@@ -3,21 +3,27 @@
 
 {% block content %}
 
+  {% if selected_pk %}
+    <br>
+    <br>
+    <div class="AnalysisOptionsDiv jumbotron container">
+      <br>
+      <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:calculate_power_prob' pk=selected_pk %} ">Calculate Power Prob</a>
+      <br>
+      <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:calculate_roc_curves' pk=selected_pk %} ">Calculate Roc Curves</a>
+      <br>
+      <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:select_test_data_subset' caller_id=2 pk=selected_pk %} ">Visualize Power Prob</a>
+      <br>
+      <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:select_test_data_subset' caller_id=3 pk=selected_pk %}">Visualize Spectrogram</a>
+      <br>
 
-  <br>
-  <br>
-  <div class="AnalysisOptionsDiv jumbotron container">
-    <br>
-    <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:calculate_power_prob' pk=selected_pk %} ">Calculate Power Prob</a>
-    <br>
-    <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:calculate_roc_curves' pk=selected_pk %} ">Calculate Roc Curves</a>
-    <br>
-    <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:select_test_data_subset' caller_id=2 pk=selected_pk %} ">Visualize Power Prob</a>
-    <br>
-    <a class="btn btn-primary btn-lg AnalysisButton" href="{%url 'analyze:select_test_data_subset' caller_id=3 pk=selected_pk %}">Visualize Spectrogram</a>
-    <br>
+
+    </div>
+
+  {% else %}
+    <h3>Please select a test set</h3>
+    <a class="btn btn-lg btn-warning" href="{% url 'analyze:select_testset'%}">Back</a>
 
 
-  </div>
-
+  {% endif %}
 {% endblock %}

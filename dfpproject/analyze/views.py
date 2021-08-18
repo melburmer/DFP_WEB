@@ -107,7 +107,10 @@ class AnalyzeTestSet(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['selected_pk'] = self.request.GET.getlist('radio_check')[0]
+        try:
+            context['selected_pk'] = self.request.GET.getlist('radio_check')[0]
+        except IndexError:
+            return {}
         return context
 
 
@@ -224,7 +227,7 @@ def calculate_power_prob(request, pk):
 
 
     if dpu.n_of_run == 0:
-        messages.warning(request, message="This test set data power and prob values have already been extracted.")
+        messages.warning(request, message="This test set data's power and prob values have already been extracted.")
         return HttpResponseRedirect('/') # return back to home page with warning
 
     messages.success(request, message=f"Power and prob data are calculated for given test set. Number of DPU Run:{dpu.n_of_run}")

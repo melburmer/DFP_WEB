@@ -27,6 +27,9 @@
 
           {{ graph|safe }}
 
+          {% else %}
+            <h3>Total Record in the Database: {{total_record}}</h3>
+
           {% endif %}
 
       </div>
