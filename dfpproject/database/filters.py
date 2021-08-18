@@ -23,3 +23,13 @@ class RecordFilter(django_filters.FilterSet):
         fields = ['fo_use_case', 'midas_version', 'project', 'region', 'territory',
         'record_type', 'activity', 'activity_channel', 'soil_type',
         'sensor_id', 'record_label', 'channel_num','record_length_in_sec']
+
+
+    # set css class
+    def __init__(self, data=None, queryset=None, *, request=None, prefix=None):
+        super(RecordFilter, self).__init__(data=data, queryset=queryset, request=request, prefix=prefix)
+        f = ['fo_use_case', 'midas_version', 'project', 'region', 'territory',
+            'record_type', 'activity', 'activity_channel', 'soil_type',
+            'sensor_id', 'record_label', 'channel_num','record_length_in_sec', 'distance_to_fo','time_of_day']
+        for i in f:
+            self.filters[i].field.widget.attrs.update({'class': 'filter-form-field'})

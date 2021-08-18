@@ -51,6 +51,35 @@
   width: 20%;
 }
 
+.filter-form-wrapper{
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
 .ExportDataFormContainer{
   width: 80%;
+  margin-left: 5px;
+}
+
+.table-responsive{
+  overflow-y: : auto;
+  max-height: 80vh;
+}
+
+.datepicker{
+  width: 100%;
+}
+
+.filter-form-field{
+  width: 100%;
+}
+
+.filter-btn{
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.export-btn{
+  margin-top: 1px;
+  width: 100%;
 }

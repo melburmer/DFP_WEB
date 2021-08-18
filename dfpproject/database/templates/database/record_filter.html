@@ -4,28 +4,24 @@
     <br>
     <div class="flex-container">
         <div class="FilterFormContainer">
-          <br>
             <form method="GET">
-                {% for field in filter.form %}
-                      {{ field.label_tag }}
-                      <br>
-                      {{ field }}
-                    <br>
-                {% endfor %}
-                <br>
-                <input type="submit" value="Filter" class="btn btn-primary btn-lg">
+              <input type="submit" value="Filter" class="btn btn-primary btn-lg filter-btn">
+
+              <div class="filter-form-wrapper">
+
+                  {% for field in filter.form %}
+                          {{ field.label_tag }}
+                          <br>
+                          {{ field }}
+                  {% endfor %}
+              </div>
 
             </form>
-
-            <br>
-
-
-          <br>
         </div>
         <div class="ExportDataFormContainer">
             <form method="POST" action="{% url 'database:export_data' %}">
               {% csrf_token %}
-              <div class="table-responsive">
+              <div class="table-responsive ">
                   <table class="table table-success table-striped table-hover table-bordered caption-top">
                     <caption>Filter results</caption>
                     <thead>
@@ -74,7 +70,7 @@
 
                   </table>
               </div>
-              <input type="submit" value="Export Data" class="btn btn-warning btn-lg">
+              <input type="submit" value="Export Data" class="btn btn-warning btn-lg export-btn">
         </form>
         </div>
 
