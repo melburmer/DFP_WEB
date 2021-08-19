@@ -251,8 +251,12 @@ def calculate_roc_curves(request, pk):
 
         dict_models = {}  # it will be used to store models' results.
         is_any_data_analyzed = False
+        try:
+            models_to_run = models_to_run.split(',') # models to run stored as "1,2,3", so split it and create list
+        except Exception as e:
+            messages.error(request, message="Error while splitting models to run. Error: " + e)
+            return HttpResponseRedirect('/')
 
-        models_to_run = models_to_run.split(',') # models to run stored as "1,2,3", so split it and create list
         for model_idx, model_id in enumerate(models_to_run):
             model_id = int(model_id)
             dict_models['model_' + str(model_id)] = {}
@@ -269,7 +273,6 @@ def calculate_roc_curves(request, pk):
                 return HttpResponseRedirect('/') # return back to home page with warning
 
             analysis_result_folder_path = os.path.join(model_results_folder_path, "act_count_analysis")  # analysis results will be saved here.
-
 
             if not os.path.exists(analysis_result_folder_path):
                 file_io.create_folder(analysis_result_folder_path)  # create if it isn't exist
@@ -425,7 +428,10 @@ def calculate_roc_curves(request, pk):
             file_io.create_folder(test_set_models_result_path)
             analysis_json_to_save_path = os.path.join(test_set_models_result_path, "analyses_res.info")
             file_io.save_to_json(dict_models, analysis_json_to_save_path)
-            visualize.visualize_roc_curves(analysis_json_to_save_path, models_to_run, acts_to_run, test_set_models_result_path)
+            try:
+                visualize.visualize_roc_curves(analysis_json_to_save_path, models_to_run, acts_to_run, test_set_models_result_path)
+            except Exception as e:
+                messages.error(request, message="Error while visualising roc curves. Error : " + str())
         else:
             messages.warning(request, message="The power and the prob values have not been extracted for any data in this test set.")
             return HttpResponseRedirect('/')

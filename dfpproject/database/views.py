@@ -229,6 +229,10 @@ class InsertManyRecord(SuccessMessageMixin, CreateView):
     def form_valid(self, form):
         is_any_record_inserted = False # will be used to check if any record is inserted
 
+        """For each record, if activity channel is not given by a user,
+        all record's act channel parameter are same (This bug happens because of object reference.)
+        To solve this problem, is_act_ch_none variable will be used.  """
+        is_activity_ch_none = False
         # ask directory path
         source_directory_path = file_io.ask_directory()
         if source_directory_path == "": # check if user select a directory.
@@ -300,7 +304,8 @@ class InsertManyRecord(SuccessMessageMixin, CreateView):
                     return HttpResponseRedirect('/') # return back to home page with error
 
             # if activity channel didn't specified
-            if self.object.activity_channel is None:
+            if self.object.activity_channel is None or is_activity_ch_none==True:
+                is_activity_ch_none = True
                 self.object.activity_channel = start_channel + round(channel_num/2) # take central channel of the record
 
             # read info content
