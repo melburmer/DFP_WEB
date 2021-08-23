@@ -1,0 +1,45 @@
+{% extends "base.html"%}
+
+{% block content %}
+
+  {% if test_set_list%}
+
+  <form action="{% url 'analyze:edit_testset' %}" method="POST">
+    {% csrf_token %}
+    <table class="table table-stripe table-hover">
+      <thead>
+        <tr>
+          <th scope="col"><strong>Selection</strong></th>
+          <th scope="col"><strong>Test Set Name</strong></th>
+          <th scope="col"><strong>Models to Run</strong></th>
+          <th scope="col"><strong>Acts to Run</strong></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for testset in test_set_list %}
+          <tr>
+              <td><input type="radio"  class="form-check-input TestsetCb" name="radio_check" value= {{testset.pk}}></td>
+              <td>{{testset.test_set_name}}</td>
+              <td>{{testset.models_to_run}}</td>
+              <td>{{testset.acts_to_run}}</td>
+          </tr>
+
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+    <input type="submit" value="Update Test set" name="update_testset" class="btn btn-success btn-lg">
+    <input type="submit" value="Add Data" name="add_data" class="btn btn-success btn-lg">
+    <input type="submit" value="Delete Data" name="delete_data" class="btn btn-success btn-lg">
+
+  </form>
+
+  {% else %}
+
+  <h1>Cannot found any Test set.</h1>
+
+  {% endif %}
+
+{% endblock %}

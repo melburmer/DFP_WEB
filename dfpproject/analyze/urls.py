@@ -7,6 +7,8 @@ app_name = "analyze"
 
 urlpatterns = [
     url(r'create_testset/$', views.CreateTestset.as_view(), name='create_testset'),
+    url(r'edit_testset/$', views.EditTestset.as_view(), name='edit_testset'),
+    url(r'update_testset/(?P<pk>\d+)$', views.UpdateTestset.as_view(), name='update_testset'),
     url(r'^select_subset_filter$', views.select_subset_filter, name="select_subset_filter"),
     url(r'^select_subset$', views.RecordSelectSubset.as_view(), name="select_subset"),
     url(r'^select_testset', views.SelectTestSet.as_view(), name="select_testset"),
@@ -18,5 +20,6 @@ urlpatterns = [
     path('visualize_power_prob/<int:test_set_pk>', views.visualize_power_prob, name='visualize_power_prob'),
     path('visualize_spectrogram/<int:test_set_pk>', views.visualize_spectrogram, name='visualize_spectrogram'),
     url(r'^visualise_rawdata/(?P<pk>\d+)$', views.visualise_rawdata, name='visualise_rawdata'),
+
 
 ]

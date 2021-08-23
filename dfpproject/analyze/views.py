@@ -18,7 +18,7 @@ import shutil
 from analyze.dpu import Dpu
 from utils import params, file_io, das_util
 # Create your views here.
-from django.views.generic import CreateView, ListView, TemplateView
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 from scipy import signal
 from plotly.subplots import make_subplots
 
@@ -81,6 +81,65 @@ class CreateTestset(SuccessMessageMixin, CreateView):
         self.object.save()
 
         return super().form_valid(form)
+
+
+
+class EditTestset(ListView):
+    model = models.Testset
+    template_name = "analyze/edit_test_set.html"
+    context_object_name = 'test_set_list'
+
+    def post(self, request):
+        selected_testset_pk = request.POST.get('radio_check', None)
+
+        if not selected_testset_pk:
+            messages.warning(request, message="Please select a test set")
+            return HttpResponseRedirect('/')
+
+        if request.POST.get('update_testset', None):
+            return redirect("analyze:update_testset", pk=selected_testset_pk)
+
+
+        elif request.POST.get('add_data', None):
+            return HttpResponseRedirect('/')
+
+        elif request.POST.get('delete_data', None):
+            return HttpResponseRedirect('/')
+
+
+class UpdateTestset(UpdateView):
+    success_url = reverse_lazy('home')
+    success_message = "Test set is updated successfully!"
+    template_name = 'analyze/update_testset.html'
+    model = models.Testset
+    fields = ['test_set_name', 'models_to_run', 'acts_to_run', 'testset_purporse']
+
+    def form_valid(self, form):
+        # get form object
+        self.object = form.save(commit=False)
+        # update test set name if it was changed.
+        results_path = self.object.results_path
+        test_set_name = self.object.test_set_name
+        dir_name = os.path.dirname(results_path)
+        new_path = dir_name + f"\\{test_set_name}"
+
+        if not os.path.exists(new_path):
+            os.rename(src=results_path, dst=new_path)
+            # update test_result path.
+            self.object.results_path = new_path
+
+        models_to_run = self.object.models_to_run
+        # update model files.
+        for model in models_to_run.split(','):
+            models_path = os.path.join(self.object.results_path, "probs")
+            if "model_"+str(model) not in os.listdir(models_path):
+                os.mkdir(os.path.join(models_path, "model_" + str(model)))
+
+        # save record
+        self.object.save()
+
+        return super().form_valid(form)
+
 
 
 
