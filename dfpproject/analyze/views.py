@@ -104,7 +104,7 @@ class EditTestset(ListView):
             return redirect("analyze:add_data_to_testset_form", pk=selected_testset_pk)
 
         elif request.POST.get('delete_data', None):
-            return HttpResponseRedirect('/')
+            return redirect("analyze:delete_data_from_testset", pk=selected_testset_pk)
 
 
 class UpdateTestset(UpdateView):
@@ -151,6 +151,40 @@ class SelectTestSet(ListView):
 def add_data_to_testset_form(request, pk):
     f = RecordFilter(request.GET, queryset=models.Records.objects.all())
     return render(request, 'analyze/add_data_to_testset_form.html', {'filter':f, 'pk':pk})
+
+
+def delete_data_from_testset(request, pk):
+    if request.method == "GET":
+        # get test set.
+        test_set_object = models.Testset.objects.get(pk=pk)
+        # get test set's data set.
+        data_set = test_set_object.__dict__["data_set"]  # dataset is a list of dict.
+
+        return render(request, "analyze/delete_data_from_testset.html", {'data_set':data_set, 'pk':pk})
+
+    else:
+        # get test set.
+        test_set_object = models.Testset.objects.get(pk=pk)
+        data_hashes_to_delete = request.POST.getlist("data_to_delete")
+        try:
+            for data_hash in data_hashes_to_delete:
+                for index, data in enumerate(test_set_object.data_set):
+                    if data_hash == data["bin_file_hash"]:
+                        test_set_object.data_set.pop(index)
+
+            test_set_object.save()
+            messages.success(request, message="Selected data are successfully deleted from test set. ")
+            return HttpResponseRedirect('/')
+
+        except Exception as e:
+            messages.error(request, message="Error while deleting data from data set. Error: "+ str(e))
+            return HttpResponseRedirect('/')
+
+
+
+
+
+
 
 
 def add_data_to_testset(request, pk):

@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'update_testset/(?P<pk>\d+)$', views.UpdateTestset.as_view(), name='update_testset'),
     url(r'add_data_to_testset_form/(?P<pk>\d+)$', views.add_data_to_testset_form, name='add_data_to_testset_form'),
     url(r'add_data_to_testset/(?P<pk>\d+)$', views.add_data_to_testset, name='add_data_to_testset'),
+    url(r'delete_data_from_testset/(?P<pk>\d+)$', views.delete_data_from_testset, name='delete_data_from_testset'),
     url(r'^select_subset_filter$', views.select_subset_filter, name="select_subset_filter"),
     url(r'^select_subset$', views.RecordSelectSubset.as_view(), name="select_subset"),
     url(r'^select_testset', views.SelectTestSet.as_view(), name="select_testset"),

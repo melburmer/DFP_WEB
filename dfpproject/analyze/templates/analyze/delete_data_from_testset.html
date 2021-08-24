@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content%}
+
+
+{% if data_set %}
+  <h1><strong>Please select records from table</strong></h1>
+  <form  action="{% url 'analyze:delete_data_from_testset' pk=pk %}" method="POST">
+    <button type="button" name="button" class="btn btn-danger btn-lg" id="SelectAllDataButton">Select all</button>
+    {% csrf_token %}
+    <table class="table table-stripe table-hover">
+      <thead>
+        <tr>
+          <th scope="col"><strong>Selections</strong></th>
+          <th scope="col"><strong>Fo use case</strong></th>
+          <th scope="col"><strong>Midas Version</strong></th>
+          <th scope="col"><strong>Project</strong></th>
+          <th scope="col"><strong>Region</strong></th>
+          <th scope="col"><strong>Record Type</strong></th>
+          <th scope="col"><strong>Act</strong></th>
+          <th scope="col"><strong>Act Spec.</strong></th>
+          <th scope="col"><strong>Act Direc.</strong></th>
+          <th scope="col"><strong>Distance to fo</strong></th>
+          <th scope="col"><strong>Soil Type</strong></th>
+          <th scope="col"><strong>Start Ch.</strong></th>
+          <th scope="col"><strong>End Ch.</strong></th>
+          <th scope="col"><strong>Channel Num</strong></th>
+          <th scope="col"><strong>Sampling Rate</strong></th>
+          <th scope="col"><strong>Record Label</strong></th>
+
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for obj in data_set %}
+          <tr>
+              <td><input type="checkbox"  class="form-check-input DataSubsetCb" name="data_to_delete" value= {{obj.bin_file_hash}}></td>
+              <td>{{obj.fo_use_case}}</td>
+              <td>{{obj.midas_version}}</td>
+              <td>{{obj.project}}</td>
+              <td>{{obj.region}}</td>
+              <td>{{obj.record_type}}</td>
+              <td>{{obj.activity}}</td>
+              <td>{{obj.activity_specification}}</td>
+              <td>{{obj.activity_direction}}</td>
+              <td>{{obj.distance_to_fo}}</td>
+              <td>{{obj.soil_type}}</td>
+              <td>{{obj.start_channel}}</td>
+              <td>{{obj.end_channel}}</td>
+              <td>{{obj.channel_num}}</td>
+              <td>{{obj.sampling_rate}}</td>
+              <td>{{obj.record_label}}</td>
+          </tr>
+
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+    <input type="submit" value="Delete selected data" class="btn btn-success btn-lg">
+  </form>
+
+{%else%}
+<h5>Test set's data set is empty.</h5>
+<a href="{%url  'home' %}" class="btn btn-secondary btn-lg">Back</a>
+{% endif %}
+
+{% endblock %}
