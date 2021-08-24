@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <br>
+    <div class="flex-container">
+        <div class="FilterFormContainer">
+            <form method="GET">
+              <input type="submit" value="Filter" class="btn btn-primary btn-lg filter-btn">
+
+              <div class="filter-form-wrapper">
+
+                  {% for field in filter.form %}
+                          {{ field.label_tag }}
+                          <br>
+                          {{ field }}
+                  {% endfor %}
+              </div>
+
+            </form>
+        </div>
+        <div class="ExportDataFormContainer">
+            <button type="button" class="btn btn-sm btn-success" id="SelectAllDataButton" name="button">Select all data</button>
+            <form method="POST" action="{% url 'analyze:add_data_to_testset' pk=pk%}">
+              {% csrf_token %}
+              <div class="table-responsive ">
+                  <table class="table table-success table-striped table-hover table-bordered caption-top">
+                    <caption>Filter results</caption>
+                    <thead>
+                      <th scope="col">Selection</th>
+                      <th scope="col">Iter Num</th>
+                      <th scope="col">Midas Version</th>
+                      <th scope="col">Use Case</th>
+                      <th scope="col">Project</th>
+                      <th scope="col">Region</th>
+                      <th scope="col">Activity</th>
+                      <th scope="col">Record Type</th>
+                      <th scope="col">Activity Channel</th>
+                      <th scope="col">Soil Type</th>
+                      <th scope="col">Distance to Fo</th>
+                      <th scope="col">Sensor ID</th>
+                      <th scope="col">Record Label</th>
+                    </thead>
+                    <tbody>
+                      {% for obj in filter.qs%}
+                        <tr>
+                          <td><input type="checkbox" class="DataSubsetCb" name="data_to_add" value={{obj.pk}}></td>
+                          <td>{{obj.iter_num}}</td>
+                          <td>{{obj.midas_version}}</td>
+                          {% if obj.fo_use_case == 'underground'%}
+                            <td>ug</td>
+                          {% else%}
+                            <td>{{obj.fo_use_case}}</td>
+                          {% endif %}
+                          <td>{{obj.project}}</td>
+                          <td>{{obj.region}}</td>
+                          <td>{{obj.activity}}</td>
+                          {% if obj.record_type == 'alarm_triggered'%}
+                            <td>at</td>
+                          {% else%}
+                            <td>{{obj.record_type}}</td>
+                          {% endif %}
+                          <td>{{obj.activity_channel}}</td>
+                          <td>{{obj.soil_type}}</td>
+                          <td>{{obj.distance_to_fo}}</td>
+                          <td>{{obj.sensor_id}}</td>
+                          <td>{{obj.record_label}}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+
+                  </table>
+              </div>
+              <input type="submit" value="Add Selected Data" class="btn btn-warning btn-lg export-btn">
+        </form>
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -105,3 +105,11 @@ $( "#SelectAllButton").click(function() {
 $( "#UncheckButton").click(function() {
    $(".SubsetCb").prop('checked', false);
 });
+
+$( "#SelectAllDataButton").click(function() {
+  $(this).toggleClass('active');
+  if ($(this).hasClass("active"))
+    $(".DataSubsetCb").prop('checked', true);
+  else
+    $(".DataSubsetCb").prop('checked', false);
+});

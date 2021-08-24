@@ -93,7 +93,7 @@ class EditTestset(ListView):
         selected_testset_pk = request.POST.get('radio_check', None)
 
         if not selected_testset_pk:
-            messages.warning(request, message="Please select a test set")
+            messages.warning(request, message="Please select a test set.")
             return HttpResponseRedirect('/')
 
         if request.POST.get('update_testset', None):
@@ -101,7 +101,7 @@ class EditTestset(ListView):
 
 
         elif request.POST.get('add_data', None):
-            return HttpResponseRedirect('/')
+            return redirect("analyze:add_data_to_testset_form", pk=selected_testset_pk)
 
         elif request.POST.get('delete_data', None):
             return HttpResponseRedirect('/')
@@ -141,24 +141,50 @@ class UpdateTestset(UpdateView):
         return super().form_valid(form)
 
 
-
-
-class RecordSelectSubset(ListView):
-    model = db_model.Records
-    template_name = "analyze/record_subset_list.html"
-    context_object_name = "records"
-
-    def get_queryset(self):
-        qs = self.model.objects.all()
-        filtered_list = RecordFilter(self.request.GET, queryset=qs)
-        return filtered_list.qs
-
-
 class SelectTestSet(ListView):
     template_name = "analyze/select_testset.html"
     context_object_name = "testsets"
     model = models.Testset
 
+
+
+def add_data_to_testset_form(request, pk):
+    f = RecordFilter(request.GET, queryset=models.Records.objects.all())
+    return render(request, 'analyze/add_data_to_testset_form.html', {'filter':f, 'pk':pk})
+
+
+def add_data_to_testset(request, pk):
+
+    test_set_obj = models.Testset.objects.get(pk=pk) # get test set object
+    # get all bin hashes for test set current dataset.
+    bin_hashes = []
+
+    for data in test_set_obj.data_set:
+        bin_hashes.append(data["bin_file_hash"])
+
+    # get pk of data to be added
+    data_to_add_pks = request.POST.getlist("data_to_add")
+
+    data_set_to_add_list = []
+
+    for data_pk in data_to_add_pks:
+        # get record
+        record_obj = db_model.Records.objects.get(pk=data_pk)
+        # append it as a dictionary
+        data_to_add = record_obj.__dict__
+
+        if data_to_add["bin_file_hash"] not in bin_hashes:
+            data_set_to_add_list.append(data_to_add)
+
+    try:
+        test_set_obj.data_set = test_set_obj.data_set + data_set_to_add_list
+        test_set_obj.save()
+        messages.success(request, message="Data are successfully added to the test set.")
+        return HttpResponseRedirect('/')
+
+    except Exception as e:
+        messages.error(request, message="Error while saving adding data to the test set. Error: "+ str(e))
+        return HttpResponseRedirect('/')
 
 
 class AnalyzeTestSet(TemplateView):
@@ -173,11 +199,20 @@ class AnalyzeTestSet(TemplateView):
         return context
 
 
+class RecordSelectSubset(ListView):
+    model = db_model.Records
+    template_name = "analyze/record_subset_list.html"
+    context_object_name = "records"
+
+    def get_queryset(self):
+        qs = self.model.objects.all()
+        filtered_list = RecordFilter(self.request.GET, queryset=qs)
+        return filtered_list.qs
+
 # return filter to the record_select_filter.html (filter result and filter form are shown in difference page.)
 def select_subset_filter(request):
     f = RecordFilter(request.GET, queryset=models.Records.objects.all())
     return render(request, 'analyze/record_subset_filter.html', {'filter':f})
-
 
 
 
