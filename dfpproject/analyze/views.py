@@ -13,6 +13,7 @@ from scipy import ndimage
 import os
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+import plotly.express as px
 import numpy as np
 import shutil
 from analyze.dpu import Dpu
@@ -726,34 +727,35 @@ def visualize_power_prob(request, test_set_pk):
 
                     # create figure for prob data
                     #plt.figure()
-                    extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
-                              prob_data_row_num, 0]
-                    plt.imshow(cur_prob_data, extent=extent, aspect='auto', cmap=colormap)
-                    plt.colorbar()
+                    #extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
+                    #          prob_data_row_num, 0]
+
+                    fig = px.imshow(cur_prob_data, x=np.arange(vis_start_ch+start_channel, vis_end_ch+start_channel), y=np.arange(0,prob_data_row_num), color_continuous_scale='RdBu_r', aspect='auto')
+                    fig.update_xaxes(title_text="Channels")
+                    fig.update_yaxes(title_text="Time index")
+
                     title_str = 'Prob results for -> Model: {0}, Act:{1}'.format(model_id, cur_act)
-                    plt.xlabel("Channels")
-                    plt.ylabel("Time index")
-                    plt.title(title_str)
-                    prob_data_img_name = raw_data_file_name + f"-prob_model{model_id}_{cur_act}.png"
+                    fig.update_layout(title_text=title_str)
+                    prob_data_img_name = raw_data_file_name + f"-prob_model{model_id}_{cur_act}.html"
                     prob_data_img_save_path = os.path.join(img_results_folder_path, prob_data_img_name)
                     # save prob data figure.
-                    plt.savefig(prob_data_img_save_path)
-                    #fig = px.imshow(cur_prob_data)
-                    #fig.show()
-                    # create figure for norm power
-                    plt.figure()
-                    extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
-                              cur_norm_power.shape[0], 0]
-                    plt.imshow(cur_norm_power, extent=extent, aspect='auto', cmap=colormap)
-                    plt.colorbar()
-                    plt.title('Norm Power [{}, {}] clipped'.format(min_norm_power, max_norm_power))
-                    plt.xlabel("Channels")
-                    plt.ylabel("Time index")
-                    norm_power_data_img_save_path = os.path.join(img_results_folder_path,
-                                                                 raw_data_file_name + "-norm_power.png")
-                    # save norm power data figure
-                    plt.savefig(norm_power_data_img_save_path)
+                    fig.write_html(prob_data_img_save_path)
+                    fig.show()
 
+                    # plot norm power
+                    #extent = [vis_start_ch+start_channel, vis_end_ch+start_channel,
+                    #          cur_norm_power.shape[0], 0]
+                    fig = px.imshow(cur_norm_power, x=np.arange(vis_start_ch+start_channel, vis_end_ch+start_channel), y=np.arange(0, cur_norm_power.shape[0]), color_continuous_scale='RdBu_r', aspect='auto')
+
+                    fig.update_xaxes(title_text="Channels")
+                    fig.update_yaxes(title_text="Time index")
+                    fig.update_layout(title_text='Norm Power [{}, {}] clipped'.format(min_norm_power, max_norm_power))
+
+                    norm_power_data_img_save_path = os.path.join(img_results_folder_path,
+                                                                 raw_data_file_name + "-norm_power.html")
+                    # save norm power data figure
+                    fig.write_html(norm_power_data_img_save_path)
+                    fig.show()
                     # calculate and visualize act count
                     n_diff_prob = len(cur_prob_threshes)
                     for prob_idx in range(n_diff_prob):
@@ -763,22 +765,19 @@ def visualize_power_prob(request, test_set_pk):
                         power_prob_anded = (prob_thresh_passing[0::, :] & norm_power_thresh_passing[3:-3:, :]).astype(int)
                         act_counts = ndimage.convolve(power_prob_anded, cur_kernel)
 
-                        plt.figure()
-                        extent = [vis_start_ch + start_channel, vis_end_ch + start_channel,
-                                  power_prob_anded.shape[0], 0]
-                        plt.imshow(act_counts, extent=extent, aspect='auto', cmap=colormap)
-                        plt.colorbar()
-                        plt.title(title_str+', Activity counts')
-                        plt.xlabel("Channels")
-                        plt.ylabel("Time index")
+                        # visualise act counts
+                        #extent = [vis_start_ch + start_channel, vis_end_ch + start_channel,
+                        #          power_prob_anded.shape[0], 0]
+                        fig = px.imshow(act_counts, x=np.arange(vis_start_ch+start_channel, vis_end_ch+start_channel), y=np.arange(0, power_prob_anded.shape[0]), color_continuous_scale='RdBu_r', aspect='auto')
+                        fig.update_xaxes(title_text="Channels")
+                        fig.update_yaxes(title_text="Time index")
+                        fig.update_layout(title_text= title_str +', Activity counts')
+
                         act_count_img_save_path = os.path.join(img_results_folder_path,
-                                                               raw_data_file_name + "-act_count.png")
-                        plt.savefig(act_count_img_save_path)
+                                                               raw_data_file_name + "-act_count.html")
+                        fig.write_html(act_count_img_save_path)
+                        fig.show()
 
-
-                    plt.show()
-                    if im_show_off:
-                        plt.close("all")
                     print('cur activity ' + cur_act + ' {}/{}'.format(act_idx + 1, len(acts_to_run)))
 
                 print('cur data: ' + raw_data_file_name + ', data progress: {0}/{1}'.format(data_idx+1, len(data_set)))
@@ -840,10 +839,10 @@ def visualize_spectrogram(request, test_set_pk):
                 vis_start_ch = int(vis_start_channels[data_doc["bin_file_hash"]])
 
             if vis_end_channels[data_doc["bin_file_hash"]] == "" or vis_end_channels[data_doc["bin_file_hash"]].isdigit() == False or int(vis_end_channels[data_doc["bin_file_hash"]])>5150:
-                vis_end_ch = data_doc["end_channel"]
+                vis_end_ch = vis_start_ch
             else:
                 #  if end channel didnt given.
-                vis_end_ch = int(vis_end_channels[data_doc["bin_file_hash"]])
+                vis_end_ch = vis_start_ch
 
             if vis_end_ch < vis_start_ch:
                 # set default start and end channels
