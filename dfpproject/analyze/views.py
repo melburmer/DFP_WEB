@@ -182,11 +182,6 @@ def delete_data_from_testset(request, pk):
 
 
 
-
-
-
-
-
 def add_data_to_testset(request, pk):
 
     test_set_obj = models.Testset.objects.get(pk=pk) # get test set object
@@ -298,6 +293,9 @@ def calculate_power_prob(request, pk):
 
             # get some features about raw data.
             raw_data_path = data_doc["data_full_path"]
+            if not os.path.exists(raw_data_path):
+                print("data cannot be found: " + raw_data_path)
+                continue
             # extract the file name. [1] used to take the tail part
             raw_data_file_name = os.path.split(raw_data_path)[1]
             # check if the power and the prob results have already been extracted by the specified data.
@@ -429,6 +427,7 @@ def calculate_roc_curves(request, pk):
                 # get some features about raw data.
                 raw_data_path = data_doc["data_full_path"]
                 record_type = data_doc["record_type"]
+                record_label = data_doc["record_label"]
                 activity_type = data_doc["activity"]
                 start_channel = data_doc['start_channel']
                 channel_num = data_doc["channel_num"]
@@ -439,15 +438,18 @@ def calculate_roc_curves(request, pk):
                     return HttpResponseRedirect('/')
 
                 # set ground truth
-                ground_truth = activity_type
-                if record_type == "alarm_triggered":
-                    ground_truth = "at"  # set ground truth as alarm triggered.
-                elif activity_type == "human":
-                    try:
-                        if data_doc["activity_specification"] == "tum_saha_yurume":
-                            ground_truth = "tum_saha_yurume"
-                    except KeyError:
-                        ground_truth = activity_type
+                if record_label == "false_alarm":
+                    ground_truth = "false_" + activity_type
+                else:
+                    ground_truth = activity_type
+                    if record_type == "alarm_triggered":
+                        ground_truth = "at"  # set ground truth as alarm triggered.
+                    elif activity_type == "human":
+                        try:
+                            if data_doc["activity_specification"] == "tum_saha_yurume":
+                                ground_truth = "tum_saha_yurume"
+                        except KeyError:
+                            ground_truth = activity_type
 
                 # analysis results of given data will be saved under the analysis result path with the .analysis extension.
                 data_analysis_result_path = os.path.join(analysis_result_folder_path, raw_data_file_name + ".analysis")
