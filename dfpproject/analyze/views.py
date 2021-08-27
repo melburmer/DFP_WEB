@@ -505,7 +505,7 @@ def calculate_roc_curves(request, pk):
 
                     dict_all_acts[cur_act] = {}
 
-                    if ground_truth == "long" or ground_truth == "at" or ground_truth == "tum_saha_yurume":
+                    if ground_truth == "long" or ground_truth == "at" or ground_truth == "tum_saha_yurume" or ground_truth=="false_"+cur_act:
                         # process all data
                         act_start = 0
                         act_end = channel_num
@@ -691,6 +691,10 @@ def visualize_power_prob(request, test_set_pk):
                 if not is_power_prob_extracted(results_path, prob_results_folder_path, raw_data_file_name):
                     continue
                 is_any_data_analyzed = True  # This variable will be False if all selected data are skipped.
+
+
+                vis_start_ch = vis_start_ch - data_doc["start_channel"]
+                vis_end_ch = vis_end_ch -  data_doc["start_channel"] + 1
 
                 for cur_act in acts_to_run:
                     act_idx = activity_names.index(cur_act)

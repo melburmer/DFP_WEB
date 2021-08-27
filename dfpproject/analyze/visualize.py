@@ -59,7 +59,7 @@ def visualize_roc_curves(analysis_result_path, models_to_run, acts_to_run, test_
                 raw_data_path = dict_all_data[key]["raw_data_path"]
                 ground_truth = dict_all_data[key]['ground_truth']
 
-                if ground_truth == "long" or ground_truth == "at" or ground_truth == "tum_saha_yurume":
+                if ground_truth == "long" or ground_truth == "at" or ground_truth == "tum_saha_yurume" or ground_truth == "false_" + act:
                     act_count_to_consider = len(dict_all_data[key][act]['channel_indices'])  # take all channels
                 else:
                     act_count_to_consider = min(acts_neigh_to_consider[act_keys.index(act)],
@@ -70,7 +70,7 @@ def visualize_roc_curves(analysis_result_path, models_to_run, acts_to_run, test_
 
                 for prob_idx in range(n_different_prob):
                     prob_thresh = prob_threshes[prob_idx]
-                    if ground_truth == 'long' or ground_truth == 'at' or ground_truth == 'tum_saha_yurume':
+                    if ground_truth == 'long' or ground_truth == 'at' or ground_truth == 'tum_saha_yurume' or ground_truth == "false_" + act:
                         # take all channels
                         cur_act_counts[:, prob_idx] = dict_all_data[key][act]['prob_'+str(round(prob_thresh*100))]['max_act_count_numbers']
                     else:
@@ -192,12 +192,12 @@ def visualize_roc_curves(analysis_result_path, models_to_run, acts_to_run, test_
                 fig.update_yaxes(title_text="Activity Counts", secondary_y=True)
                 #ax2.set_ylabel('Activity Counts')
                 #ax2.legend(loc='lower right')
-                img_path = os.path.join(act_analysis_figures_folder_path,
-                                        'nn_roc_curve-prob_'+str(round(cur_prob_thresh * 100))+'.html')
-
-                fig.write_html(img_path)
-                fig.show()
-
                 print('Current model id: ' + str(model_id) + '; {}/{}'.format(model_idx + 1, len(models_to_run)))
+            img_path = os.path.join(act_analysis_figures_folder_path,
+                                    'nn_roc_curve-prob_'+str(round(cur_prob_thresh * 100))+'.html')
+            fig.write_html(img_path)
+            fig.show()
+
+
 
         print('cur act: ' + act + '; {}/{}'.format(act_idx + 1, len(acts_to_run)))

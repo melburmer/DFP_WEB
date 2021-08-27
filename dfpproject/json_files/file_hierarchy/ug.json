@@ -17,4 +17,5 @@
     "territory_igdir": ["bulent_aydin","subasi"],
     "record_type": ["alarm_triggered","on_demand"],
     "activity_type": ["human","digging","excavator","vehicle","raining","long","earthquake"]
+
 }
