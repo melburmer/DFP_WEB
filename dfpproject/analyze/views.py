@@ -19,7 +19,7 @@ import shutil
 from analyze.dpu import Dpu
 from utils import params, file_io, das_util
 # Create your views here.
-from django.views.generic import CreateView, ListView, TemplateView, UpdateView
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView, DetailView
 from scipy import signal
 from plotly.subplots import make_subplots
 
@@ -148,6 +148,26 @@ class SelectTestSet(ListView):
     model = models.Testset
 
 
+class ListTestset(ListView):
+    template_name = "analyze/list_testset.html"
+    model = models.Testset
+    context_object_name = "test_sets_list"
+
+class DetailTestset(DetailView):
+    model = models.Testset
+    template_name = "analyze/detail_testset.html"
+    context_object_name = "test_set"
+
+
+
+"""
+def list_test_set(request):
+    if request.method == "GET":
+        test_set_list = models.Testset.objects.all()
+        test_set_list_dict = test_set_list.__dict__
+
+        return render(request, template_name="analyze/list_testset.html", context={"test_sets_list":test_set_list_dict})
+"""
 
 def add_data_to_testset_form(request, pk):
     f = RecordFilter(request.GET, queryset=models.Records.objects.all())
